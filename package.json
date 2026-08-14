@@ -1,0 +1,28 @@
+{
+  "name": "janhisab-platform",
+  "version": "1.0.0",
+  "description": "India's Public Accountability Platform - Full MERN Stack",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "seed": "cd server && node seed/seedData.js",
+    "test": "cd server && node test-api.js"
+  },
+  "keywords": [
+    "civic-tech",
+    "governance",
+    "accountability",
+    "mern",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "JanHisab Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

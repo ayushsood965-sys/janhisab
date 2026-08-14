@@ -1,3 +1,5 @@
+<div align="center">
+
 # 🏛️ JanHisab (जन हिसाब)
 ### **India's Citizen-Led Public Accountability & Civic-Tech Platform**
 
@@ -108,5 +110,146 @@ By unifying crowd-sourced grievance reporting, verified electoral promise tracki
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/janhisab-platform.git
-cd janhisab-platform
+git clone https://github.com/ayushsood965-sys/janhisab.git
+cd janhisab
+```
+
+### 2. Install Dependencies
+Install all root, backend, and frontend dependencies with one command:
+```bash
+npm run install:all
+```
+*Or manually:*
+```bash
+npm install
+cd server && npm install
+cd ../client && npm install
+cd ..
+```
+
+### 3. Configure Environment Variables
+
+**Backend (`server/.env`)**:
+```env
+PORT=5001
+MONGODB_URI=mongodb://127.0.0.1:27017/janhisab
+JWT_SECRET=your_secure_jwt_secret_key_here
+CLIENT_URL=http://localhost:5173
+NODE_ENV=development
+```
+
+### 4. Seed the Database with Realistic Demo Data
+Populate politicians, institutions, promises, RTI templates, petitions, and demo accounts:
+```bash
+npm run seed
+```
+
+### 5. Start the Development Servers
+Run both backend API (`port 5001`) and frontend Vite dev server (`port 5173`) concurrently:
+```bash
+npm run dev
+```
+
+Visit **`http://localhost:5173`** in your browser.
+
+---
+
+## 🔐 Role-Based Access & Demo Credentials
+
+Use any of these pre-seeded accounts to explore different access levels (Password for all accounts is: `password123`):
+
+| Role | Email | Password | Console URL |
+|---|---|---|---|
+| **Super Admin** | `admin@janhisab.org` | `password123` | `/dashboard` or `/admin/cms` |
+| **Elected Representative** | `mla.rajesh@delhiassembly.gov.in` | `password123` | `/dashboard` |
+| **Community Moderator** | `moderator@janhisab.org` | `password123` | `/dashboard` |
+| **Citizen (Whistleblower)** | `priya.sharma@example.com` | `password123` | `/dashboard` |
+
+---
+
+## 📁 Directory Structure
+
+```plaintext
+janhisab/
+├── package.json               # Root workspace scripts (concurrently dev runner)
+├── server/                    # Node.js + Express + Socket.IO Backend
+│   ├── config/                # Database & server configuration
+│   ├── middleware/            # JWT auth, RBAC authorization, upload middlewares
+│   ├── models/                # Mongoose schemas (User, Politician, Post, Promise, RTI, etc.)
+│   ├── routes/                # REST API routes for all modules
+│   ├── seed/                  # Database seeder with realistic civic records
+│   ├── services/              # AI helpers, image processors, notification dispatchers
+│   ├── uploads/               # Processed media assets & user uploads
+│   └── index.js               # Express application & Socket.IO server entrypoint
+│
+└── client/                    # React 18 + Vite + Tailwind CSS Frontend
+    ├── public/                # Static assets, logos, lottie animations
+    ├── src/
+    │   ├── components/        # Reusable UI components (Navbar, Modals, Cards, Charts)
+    │   ├── context/           # AuthContext, SocketContext
+    │   ├── pages/             # Route views (VoiceWall, Politicians, RTIs, Maps, etc.)
+    │   │   └── dashboard/     # Role-specific consoles (Citizen, Rep, Mod, SuperAdmin)
+    │   ├── services/          # Axios API clients & WebSocket subscribers
+    │   ├── App.jsx            # Dynamic routing & root layout wrapper
+    │   ├── index.css          # Tailwind design tokens & custom utility classes
+    │   └── main.jsx           # React DOM root mounting
+```
+
+---
+
+## 🔌 API Endpoints
+
+### 🔑 Authentication & Users
+- `POST /api/auth/register` — Register a citizen account
+- `POST /api/auth/login` — Authenticate and receive JWT token
+- `GET /api/auth/me` — Fetch current user profile & permissions
+
+### 📢 Voice Wall & Posts
+- `GET /api/posts` — Fetch paginated civic posts (filters: category, location, status)
+- `POST /api/posts` — Create a new geo-tagged grievance / whistleblower post
+- `PUT /api/posts/:id/upvote` — Upvote or downvote an issue
+- `POST /api/posts/:id/comments` — Add citizen commentary or officer update
+
+### 🏛️ Politicians & Promises
+- `GET /api/politicians` — List representatives with performance filters
+- `GET /api/politicians/:id` — Detailed report card, attendance & asset records
+- `GET /api/promises` — List tracked election promises with verification status
+- `POST /api/promises/:id/verify` — Submit verification proof for a promise
+
+### ⚡ RTI & Petitions
+- `POST /api/rti/generate` — Generate structured RTI application / appeal
+- `GET /api/rti/templates` — List standard RTI departmental templates
+- `GET /api/petitions` — List ongoing civic petitions & signature status
+- `POST /api/petitions/:id/sign` — Digitally sign a petition
+
+---
+
+## 🛡️ Security & Privacy
+- **Zero Raw Phone Storage**: Phones hashed with SHA-256 for non-reversible citizen uniqueness verification.
+- **Strict Rate Limiting**: Protection against spam grievance filings and DDoS attacks using `express-rate-limit`.
+- **Sanitized Uploads**: Image sanitization and re-encoding via `sharp` to strip malicious EXIF metadata.
+- **Role-Based Middlewares**: Granular endpoint protection ensuring only authorized roles perform privileged actions.
+
+---
+
+## 🤝 Contributing
+
+Contributions to JanHisab are wholeheartedly welcome!
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/CivicInnovation`)
+3. Commit your changes (`git commit -m "feat: Add constituency budget visualizer"`)
+4. Push to the branch (`git push origin feature/CivicInnovation`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <b>Built with ❤️ for Indian Democracy and Accountable Governance.</b>
+</div>
