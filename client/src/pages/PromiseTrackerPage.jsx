@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getPromises, submitPromiseEvidence } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import {
   CheckCircle,
   Clock,
@@ -31,6 +32,7 @@ const CATEGORIES = [
 
 export default function PromiseTrackerPage() {
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [promises, setPromises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -71,7 +73,7 @@ export default function PromiseTrackerPage() {
   const handleEvidenceSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in to submit ground truth evidence.');
+      toast.warning('Please log in to submit ground truth evidence.', 'Authentication Required');
       return;
     }
     setSubmittingEvidence(true);
@@ -82,7 +84,7 @@ export default function PromiseTrackerPage() {
         evidenceUrl,
       });
       if (res.data.success) {
-        alert('🎉 Ground evidence recorded on Promise timeline! +20 XP awarded.');
+        toast.success('Ground evidence recorded on Promise timeline! +20 XP awarded.', 'Evidence Submitted');
         setSelectedPromise(null);
         setEvidenceTitle('');
         setEvidenceDesc('');
@@ -90,7 +92,7 @@ export default function PromiseTrackerPage() {
         fetchPromiseList();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error submitting evidence');
+      toast.error(err.response?.data?.message || 'Error submitting evidence');
     } finally {
       setSubmittingEvidence(false);
     }

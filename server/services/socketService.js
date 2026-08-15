@@ -1,5 +1,5 @@
 /**
- * JanHisab Real-Time WebSockets Engine (Socket.io)
+ * JanAudit Real-Time WebSockets Engine (Socket.io)
  * Powers live political reactions, score tickers, and Andolan Mode ephemeral protest spaces
  */
 

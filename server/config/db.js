@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 let mongoMemoryServer = null;
 
 const connectDB = async () => {
-  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/janhisab';
+  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/janaudit';
   
   try {
     console.log(`📡 Connecting to MongoDB at ${uri}...`);

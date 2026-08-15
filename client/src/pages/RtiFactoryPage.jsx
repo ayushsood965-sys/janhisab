@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getRtiTemplates, generateRtiDraft, getRtiVault, uploadRtiResponse, getRtiLeaderboard } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import {
   FileText,
   Download,
@@ -20,6 +21,7 @@ import {
 
 export default function RtiFactoryPage() {
   const { user, isAuthenticated, updateUserPoints } = useAuth();
+  const { toast } = useToast();
   const [templates, setTemplates] = useState([]);
   const [vaultResponses, setVaultResponses] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -84,9 +86,10 @@ export default function RtiFactoryPage() {
 
       if (res.data.success) {
         setGeneratedDraft(res.data.draftText);
+        toast.success('RTI Legal Draft generated successfully!');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error generating draft');
+      toast.error(err.response?.data?.message || 'Error generating draft');
     } finally {
       setGenerating(false);
     }
@@ -95,7 +98,7 @@ export default function RtiFactoryPage() {
   const handleUploadResponseSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in to upload RTI responses.');
+      toast.warning('Please log in to publish verified RTI disclosures.', 'Authentication Required');
       return;
     }
     setUploading(true);
@@ -109,7 +112,7 @@ export default function RtiFactoryPage() {
       });
 
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message || 'RTI response published to Public Vault! +100 XP');
         setShowUploadModal(false);
         setUploadTitle('');
         setUploadDocUrl('');
@@ -118,7 +121,7 @@ export default function RtiFactoryPage() {
         fetchRtiData();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error uploading RTI response');
+      toast.error(err.response?.data?.message || 'Error uploading RTI response');
     } finally {
       setUploading(false);
     }
@@ -329,7 +332,7 @@ export default function RtiFactoryPage() {
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(generatedDraft);
-                      alert('RTI text copied to clipboard!');
+                      toast.success('RTI legal text copied to clipboard!');
                     }}
                     className="px-3 py-1.5 rounded-xl bg-brand-50 border border-brand-200 text-xs text-brand-700 font-bold hover:bg-brand-100 flex items-center space-x-1 transition-colors"
                   >

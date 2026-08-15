@@ -21,7 +21,7 @@ export default function AboutPage() {
           <span className="text-emerald-700 font-bold">100% AUDITABLE CODE</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-black text-gradient-hero font-['Outfit']">
-          How JanHisab Computes Accountability
+          How JanAudit Computes Accountability
         </h1>
         <p className="text-xs sm:text-sm text-textSecondary mt-2 max-w-2xl leading-relaxed">
           No black-box algorithms. No partisan bias. Every score on this platform is computable by anyone using published equations and verified public databases.
@@ -93,7 +93,7 @@ export default function AboutPage() {
         </h3>
         <div className="space-y-3 text-xs text-textSecondary leading-relaxed">
           <p>
-            Political parties routinely employ coordinated IT cells to flood social media polls. JanHisab neutralizes this via three mathematical barriers:
+            Political parties routinely employ coordinated IT cells to flood social media polls. JanAudit neutralizes this via three mathematical barriers:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
             <div className="p-4 rounded-2xl bg-brand-50/50 border border-brand-100">

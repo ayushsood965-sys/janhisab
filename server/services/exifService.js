@@ -1,5 +1,5 @@
 /**
- * JanHisab EXIF Sanitization & Anonymization Engine
+ * JanAudit EXIF Sanitization & Anonymization Engine
  * Automatically strips all GPS coordinates, camera serials, timestamps, and device metadata
  */
 

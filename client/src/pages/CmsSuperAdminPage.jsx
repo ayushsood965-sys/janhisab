@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getCmsConfig, updateCmsFormulaWeights, toggleCmsModule } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import {
   Shield,
   Sliders,
@@ -15,6 +16,7 @@ import {
 
 export default function CmsSuperAdminPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [config, setConfig] = useState(null);
   const [weights, setWeights] = useState({
     objectiveDataWeight: 0.45,
@@ -59,18 +61,18 @@ export default function CmsSuperAdminPage() {
   const handleSaveWeights = async () => {
     const total = Object.values(weights).reduce((a, b) => a + b, 0);
     if (Math.abs(total - 1.0) > 0.05) {
-      alert(`⚠️ Weights must sum to 1.0 (Current: ${total.toFixed(2)})`);
+      toast.warning(`Weights must sum to 1.0 (Current: ${total.toFixed(2)})`, 'Invalid Weight Distribution');
       return;
     }
     setSaving(true);
     try {
       const res = await updateCmsFormulaWeights(weights);
       if (res.data.success) {
-        alert('🎉 Mathematical Impact Score formula weights updated across all politician calculations!');
+        toast.success('Mathematical Impact Score formula weights updated across all politician calculations!', 'Weights Updated');
         fetchConfig();
       }
     } catch (err) {
-      alert('Error updating formula weights');
+      toast.error('Error updating formula weights');
     } finally {
       setSaving(false);
     }
@@ -81,9 +83,10 @@ export default function CmsSuperAdminPage() {
       const res = await toggleCmsModule(moduleKey, !currentStatus);
       if (res.data.success) {
         setModules((prev) => ({ ...prev, [moduleKey]: !currentStatus }));
+        toast.info(`Module ${moduleKey} switch updated!`);
       }
     } catch (err) {
-      alert('Error toggling module switch');
+      toast.error('Error toggling module switch');
     }
   };
 

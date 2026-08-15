@@ -1,5 +1,5 @@
 {
-  "name": "janhisab-platform",
+  "name": "janaudit-platform",
   "version": "1.0.0",
   "description": "India's Public Accountability Platform - Full MERN Stack",
   "main": "server/index.js",
@@ -20,7 +20,7 @@
     "nodejs",
     "mongodb"
   ],
-  "author": "JanHisab Team",
+  "author": "JanAudit Team",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^9.1.2"

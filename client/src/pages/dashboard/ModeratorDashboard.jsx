@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import {
   getPosts,
   upgradePostEvidence,
@@ -37,6 +38,7 @@ const SIDEBAR_ITEMS = [
 
 export default function ModeratorDashboard() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('queue');
 
   // Evidence Queue state
@@ -121,10 +123,10 @@ export default function ModeratorDashboard() {
         setPosts((prev) =>
           prev.map((p) => (p._id === postId ? { ...p, evidenceLevel: newLevel, isCorroborated: newLevel === 'verified' } : p))
         );
-        alert(`Post evidence level successfully upgraded to ${newLevel.toUpperCase()}!`);
+        toast.success(`Post evidence level successfully upgraded to ${newLevel.toUpperCase()}!`, 'Evidence Upgraded');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error upgrading evidence');
+      toast.error(err.response?.data?.message || 'Error upgrading evidence');
     }
   };
 
@@ -134,16 +136,16 @@ export default function ModeratorDashboard() {
     try {
       await deletePost(postId);
       setPosts((prev) => prev.filter((p) => p._id !== postId));
-      alert('Post taken down by Lokpal Jury.');
+      toast.info('Post taken down by Lokpal Jury.');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error taking down post');
+      toast.error(err.response?.data?.message || 'Error taking down post');
     }
   };
 
   // Flagged spam actions
   const handleDismissFlag = (flagId) => {
     setFlaggedPosts((prev) => prev.filter((f) => f.id !== flagId));
-    alert('Flag dismissed.');
+    toast.info('Flag dismissed.');
   };
 
   // Fact Check CRUD handlers
@@ -164,7 +166,7 @@ export default function ModeratorDashboard() {
               : fc
           )
         );
-        alert('Fact-Check entry updated!');
+        toast.success('Fact-Check entry updated!');
       } else {
         const res = await createFactCheck({
           claim: fcClaim,
@@ -174,7 +176,7 @@ export default function ModeratorDashboard() {
         });
         if (res.data.success) {
           setFactChecks((prev) => [res.data.factCheck, ...prev]);
-          alert('Fact-Check entry published to Public Registry!');
+          toast.success('Fact-Check entry published to Public Registry!', 'Fact Check Active');
         }
       }
       setShowFactCheckModal(false);
@@ -183,14 +185,14 @@ export default function ModeratorDashboard() {
       setFcExplanation('');
       setFcSources('');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error creating fact check');
+      toast.error(err.response?.data?.message || 'Error creating fact check');
     }
   };
 
   const handleDeleteFactCheck = (id) => {
     if (!window.confirm('Delete this fact-check entry from the public registry?')) return;
     setFactChecks((prev) => prev.filter((fc) => fc.id !== id));
-    alert('Fact check entry removed.');
+    toast.info('Fact check entry removed.');
   };
 
   return (
@@ -337,7 +339,7 @@ export default function ModeratorDashboard() {
                   <button
                     onClick={() => {
                       handleDismissFlag(flag.id);
-                      alert(`Account @${flag.authorHandle} permanently banned.`);
+                      toast.warning(`Account @${flag.authorHandle} suspended from platform.`);
                     }}
                     className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-black hover:bg-rose-700"
                   >

@@ -42,7 +42,7 @@ const cmsConfigSchema = new mongoose.Schema(
       enabled: { type: Boolean, default: true },
       text: {
         type: String,
-        default: '⚖️ JanHisab Beta: Pro-Democracy. Pro-Transparency. Every promise tracked, every score explainable.',
+        default: '⚖️ JanAudit Beta: Pro-Democracy. Pro-Transparency. Every promise tracked, every score explainable.',
       },
       link: { type: String, default: '/about' },
       badge: { type: String, default: 'PUBLIC AUDIT' },

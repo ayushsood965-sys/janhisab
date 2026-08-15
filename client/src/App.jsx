@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+import { ToastProvider } from './context/ToastContext';
 import { getCmsConfig } from './services/api';
 
 // Layout Components
@@ -148,13 +149,15 @@ export default function App() {
   return (
     <AuthProvider>
       <SocketProvider>
-        <Router>
-          <AppContent
-            showCreatePostModal={showCreatePostModal}
-            setShowCreatePostModal={setShowCreatePostModal}
-            announcement={announcement}
-          />
-        </Router>
+        <ToastProvider>
+          <Router>
+            <AppContent
+              showCreatePostModal={showCreatePostModal}
+              setShowCreatePostModal={setShowCreatePostModal}
+              announcement={announcement}
+            />
+          </Router>
+        </ToastProvider>
       </SocketProvider>
     </AuthProvider>
   );

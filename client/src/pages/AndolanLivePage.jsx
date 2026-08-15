@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { getAndolanRooms, createAndolanRoom, getAndolanMessages, sendAndolanMessage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { useToast } from '../context/ToastContext';
 import {
   Radio,
   Users,
@@ -17,6 +18,7 @@ import {
 
 export default function AndolanLivePage() {
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const socket = useSocket();
   const [rooms, setRooms] = useState([]);
   const [activeRoom, setActiveRoom] = useState(null);
@@ -87,7 +89,7 @@ export default function AndolanLivePage() {
     e.preventDefault();
     if (!messageInput.trim() || !activeRoom) return;
     if (!isAuthenticated) {
-      alert('Please log in or create an anonymous handle to participate in Andolan.');
+      toast.warning('Please log in or create an anonymous handle to participate in Andolan.', 'Authentication Required');
       return;
     }
 
@@ -110,14 +112,14 @@ export default function AndolanLivePage() {
         setMessageInput('');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error sending message');
+      toast.error(err.response?.data?.message || 'Error sending message');
     }
   };
 
   const handleCreateRoomSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in to initiate an Andolan space.');
+      toast.warning('Please log in to initiate an Andolan space.', 'Authentication Required');
       return;
     }
     setCreating(true);
@@ -129,14 +131,14 @@ export default function AndolanLivePage() {
       });
 
       if (res.data.success) {
-        alert('🎉 48-Hour Ephemeral Andolan Space launched!');
+        toast.success('48-Hour Ephemeral Andolan Space launched! Live room ready.', 'Space Active');
         setShowCreateModal(false);
         setRoomTitle('');
         setRoomTopic('');
         fetchRooms();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error creating room');
+      toast.error(err.response?.data?.message || 'Error creating room');
     } finally {
       setCreating(false);
     }

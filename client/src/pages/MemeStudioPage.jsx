@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getMemeTemplates, getRoastCards, createPost } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import {
   Smile,
   Download,
@@ -15,6 +16,7 @@ import {
 
 export default function MemeStudioPage() {
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const canvasRef = useRef(null);
   const [templates, setTemplates] = useState([]);
   const [roastCards, setRoastCards] = useState([]);
@@ -92,22 +94,22 @@ export default function MemeStudioPage() {
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 2;
       ctx.textAlign = 'right';
-      ctx.strokeText('JanHisab.org • Janta Ka Boss', 585, 490);
-      ctx.fillText('JanHisab.org • Janta Ka Boss', 585, 490);
+      ctx.strokeText('JanAudit.org • Janta Ka Boss', 585, 490);
+      ctx.fillText('JanAudit.org • Janta Ka Boss', 585, 490);
     };
   }, [selectedTemplate, topText, bottomText, customImage]);
 
   const handleDownloadMeme = () => {
     if (!canvasRef.current) return;
     const link = document.createElement('a');
-    link.download = `JanHisab_Meme_${Date.now()}.png`;
+    link.download = `JanAudit_Meme_${Date.now()}.png`;
     link.href = canvasRef.current.toDataURL();
     link.click();
   };
 
   const handlePostToVoiceWall = async () => {
     if (!isAuthenticated) {
-      alert('Please log in to publish meme to the Voice Wall.');
+      toast.warning('Please log in to publish meme to the Voice Wall.', 'Authentication Required');
       return;
     }
     const dataUrl = canvasRef.current?.toDataURL();
@@ -116,20 +118,20 @@ export default function MemeStudioPage() {
     try {
       const res = await createPost({
         title: topText || 'Civic Satire Meme',
-        content: bottomText || 'Satirical political meme generated in JanHisab Meme Studio',
+        content: bottomText || 'Satirical political meme generated in JanAudit Meme Studio',
         postType: 'meme',
         mediaUrl: dataUrl,
         category: 'General Satire',
         roastToastTag: roastTag,
         evidenceLevel: 'opinion',
-        hashtags: ['#JanHisabMeme', '#RoastMyNeta', '#CivicSatire'],
+        hashtags: ['#JanAuditMeme', '#RoastMyNeta', '#CivicSatire'],
       });
 
       if (res.data.success) {
-        alert('🎉 Meme successfully published to the Voice Wall!');
+        toast.success('Meme successfully published to the Voice Wall! +25 XP', 'Meme Live');
       }
     } catch (err) {
-      alert('Error publishing meme to feed');
+      toast.error(err.response?.data?.message || 'Error publishing meme to feed');
     }
   };
 

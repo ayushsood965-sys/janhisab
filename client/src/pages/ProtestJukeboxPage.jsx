@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getJukeboxTracks, voteJukeboxTrack, uploadJukeboxTrack, getPoliticians, setPoliticianAnthem } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import {
   Music,
   Play,
@@ -16,6 +17,7 @@ import {
 
 export default function ProtestJukeboxPage() {
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [tracks, setTracks] = useState([]);
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -55,25 +57,26 @@ export default function ProtestJukeboxPage() {
 
   const handleVote = async (trackId) => {
     if (!isAuthenticated) {
-      alert('Please log in to upvote songs.');
+      toast.warning('Please log in to upvote songs.', 'Authentication Required');
       return;
     }
     try {
       const res = await voteJukeboxTrack(trackId);
       if (res.data.success) {
+        toast.success('Vote recorded for track!');
         setTracks((prev) =>
           prev.map((t) => (t._id === trackId ? { ...t, upvotes: res.data.upvotes } : t))
         );
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error voting track');
+      toast.error(err.response?.data?.message || 'Error voting track');
     }
   };
 
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in to upload audio.');
+      toast.warning('Please log in to upload audio.', 'Authentication Required');
       return;
     }
     setUploading(true);
@@ -89,7 +92,7 @@ export default function ProtestJukeboxPage() {
       });
 
       if (res.data.success) {
-        alert('🎉 Audio uploaded to Awaaz Jukebox! +50 XP awarded.');
+        toast.success('Audio uploaded to Awaaz Jukebox! +50 XP awarded.', 'Track Published');
         setShowUploadModal(false);
         setTitle('');
         setAudioUrl('');
@@ -97,7 +100,7 @@ export default function ProtestJukeboxPage() {
         fetchTracks();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error uploading track');
+      toast.error(err.response?.data?.message || 'Error uploading track');
     } finally {
       setUploading(false);
     }

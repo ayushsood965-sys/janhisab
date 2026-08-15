@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPoliticianById, submitRating, submitRightOfReply, setPoliticianAnthem } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import confetti from 'canvas-confetti';
 import {
   ShieldCheck,
@@ -28,6 +29,7 @@ import {
 export default function PoliticianDetailPage() {
   const { id } = useParams();
   const { user, isAuthenticated, updateUserPoints } = useAuth();
+  const { toast } = useToast();
   const [politician, setPolitician] = useState(null);
   const [promises, setPromises] = useState([]);
   const [taggedPosts, setTaggedPosts] = useState([]);
@@ -85,7 +87,7 @@ export default function PoliticianDetailPage() {
   const handleRatingSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in or create an anonymous handle to vote.');
+      toast.warning('Please log in or create an anonymous handle to vote.', 'Authentication Required');
       return;
     }
     setRatingSubmitting(true);
@@ -100,13 +102,13 @@ export default function PoliticianDetailPage() {
 
       if (res.data.success) {
         confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-        alert(res.data.message);
+        toast.success(res.data.message || 'Rating submitted and audited cryptographically!', 'Vote Recorded');
         setShowRatingModal(false);
         updateUserPoints(res.data.userRemainingPoints, res.data.userKarmaTier);
         fetchProfile();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error submitting rating');
+      toast.error(err.response?.data?.message || 'Error submitting rating');
     } finally {
       setRatingSubmitting(false);
     }
@@ -115,7 +117,7 @@ export default function PoliticianDetailPage() {
   const handleRightOfReplySubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in as a verified representative to publish a response.');
+      toast.warning('Please log in as a verified representative to publish a response.', 'Authentication Required');
       return;
     }
     setReplySubmitting(true);
@@ -127,14 +129,14 @@ export default function PoliticianDetailPage() {
       });
 
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message || 'Official Right of Reply published to public record!', 'Response Published');
         setReplyText('');
         setReplyDesignation('');
         setReplyDocUrl('');
         fetchProfile();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error submitting reply');
+      toast.error(err.response?.data?.message || 'Error submitting reply');
     } finally {
       setReplySubmitting(false);
     }

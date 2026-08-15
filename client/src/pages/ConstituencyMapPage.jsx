@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaf
 import L from 'leaflet';
 import { getMapIssues, reportMapIssue, getConstituencyByPincode, getHawaMeter } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import {
   MapPin,
   Search,
@@ -36,6 +37,7 @@ function LocationMarker({ onPinDropped }) {
 
 export default function ConstituencyMapPage() {
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [issues, setIssues] = useState([]);
   const [hawaTrends, setHawaTrends] = useState([]);
   const [pincodeInput, setPincodeInput] = useState('110001');
@@ -73,7 +75,7 @@ export default function ConstituencyMapPage() {
         setConstituencyProfile(res.data);
       }
     } catch (err) {
-      alert('Could not resolve PIN code profile');
+      toast.error('Could not resolve PIN code profile');
     } finally {
       setPincodeLoading(false);
     }
@@ -93,7 +95,7 @@ export default function ConstituencyMapPage() {
   const handleReportSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in to pin an issue.');
+      toast.warning('Please log in to pin an issue.', 'Authentication Required');
       return;
     }
     setReporting(true);
@@ -107,13 +109,13 @@ export default function ConstituencyMapPage() {
         constituency: constituencyProfile?.constituency || 'New Delhi',
       });
       if (res.data.success) {
-        alert('🎉 Civic issue pinned to map! Fellow citizens can now corroborate.');
+        toast.success('Civic issue pinned to map! Fellow citizens can now corroborate.', 'Issue Pinned');
         setShowPinModal(false);
         setIssueTitle('');
         fetchMapData();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error pinning issue');
+      toast.error(err.response?.data?.message || 'Error pinning issue');
     } finally {
       setReporting(false);
     }

@@ -156,7 +156,7 @@ export default function AuthModal({ mode = 'login', onClose, onSwitchMode }) {
             {step === 'otp'
               ? 'Verify 6-Digit Email Code'
               : activeTab === 'login'
-              ? 'Welcome to JanHisab'
+              ? 'Welcome to JanAudit'
               : 'Join the Accountability Movement'}
           </h3>
           <p className="text-xs text-slate-600 font-medium mt-1">
@@ -230,7 +230,7 @@ export default function AuthModal({ mode = 'login', onClose, onSwitchMode }) {
                   required
                   value={loginIdentifier}
                   onChange={(e) => setLoginIdentifier(e.target.value)}
-                  placeholder="e.g. AngryAloo_42 or admin@janhisab.org"
+                  placeholder="e.g. AngryAloo_42 or admin@janaudit.org"
                   className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-brand-50/50 border border-brand-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-500 font-bold shadow-xs"
                 />
               </div>

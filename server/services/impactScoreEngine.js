@@ -1,5 +1,5 @@
 /**
- * JanHisab Impact Score™ Engine
+ * JanAudit Impact Score™ Engine
  * Published, Auditable, Manipulation-Proof Civic Rating Algorithm
  */
 

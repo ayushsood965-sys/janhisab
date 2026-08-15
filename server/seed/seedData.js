@@ -25,7 +25,7 @@ function hashPhone(phone) {
 
 async function seedDatabase() {
   try {
-    console.log('🌱 Starting JanHisab Database Seeding...');
+    console.log('🌱 Starting JanAudit Database Seeding...');
 
     // Clear existing collections
     await User.deleteMany({});
@@ -51,7 +51,7 @@ async function seedDatabase() {
     const adminUser = await User.create({
       fullName: 'Super Admin Guardian',
       handle: 'SuperAdmin_Nagrik',
-      email: 'admin@janhisab.org',
+      email: 'admin@janaudit.org',
       role: 'superadmin',
       verificationStatus: 'VERIFIED',
       phoneHash: hashPhone('9999999999'),
@@ -71,7 +71,7 @@ async function seedDatabase() {
     const moderatorUser = await User.create({
       fullName: 'Lokpal Jury Chief',
       handle: 'Lokpal_Jury_Head',
-      email: 'jury@janhisab.org',
+      email: 'jury@janaudit.org',
       role: 'moderator',
       verificationStatus: 'VERIFIED',
       phoneHash: hashPhone('8888888888'),
@@ -88,7 +88,7 @@ async function seedDatabase() {
     const citizen1 = await User.create({
       fullName: 'Aman Sharma',
       handle: 'AngryAloo_42',
-      email: 'aloo@janhisab.org',
+      email: 'aloo@janaudit.org',
       role: 'citizen',
       verificationStatus: 'VERIFIED',
       phoneHash: hashPhone('7777777777'),
@@ -109,7 +109,7 @@ async function seedDatabase() {
     const citizen2 = await User.create({
       fullName: 'Priya Iyer',
       handle: 'ChaiPeCharcha_99',
-      email: 'chai@janhisab.org',
+      email: 'chai@janaudit.org',
       role: 'citizen',
       verificationStatus: 'VERIFIED',
       phoneHash: hashPhone('6666666666'),
@@ -578,7 +578,7 @@ async function seedDatabase() {
         evidenceSources: [
           {
             title: 'Delhi PWD Quality Control Testing Lab Report #PWD-QC-2026-44',
-            url: 'https://janhisab.org/docs/rti_pwd_qc.pdf',
+            url: 'https://janaudit.org/docs/rti_pwd_qc.pdf',
             sourceType: 'rti_document',
           },
         ],
@@ -897,14 +897,14 @@ async function seedDatabase() {
       },
       announcement: {
         enabled: true,
-        text: '⚖️ JanHisab: Pro-Democracy. Pro-Transparency. Every promise tracked, every claim evidenced, every score explainable.',
+        text: '⚖️ JanAudit: Pro-Democracy. Pro-Transparency. Every promise tracked, every claim evidenced, every score explainable.',
         link: '/about',
         badge: 'PUBLIC AUDIT LIVE',
       },
     });
 
     console.log('✅ Global CMS Config seeded.');
-    console.log('🎉 JanHisab Complete Seed Data Generation Finished Successfully!');
+    console.log('🎉 JanAudit Complete Seed Data Generation Finished Successfully!');
   } catch (err) {
     console.error('❌ Seeding failed:', err);
   }

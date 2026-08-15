@@ -23,24 +23,41 @@
   }
 }
 
-/* Custom Scrollbar - Soft Lavender & Deep Purple */
+/* Ultra-thin Minimalist Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F1F3FB;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #DDD6FE;
-  border-radius: 8px;
-  border: 2px solid #F1F3FB;
+  background: rgba(167, 139, 250, 0.35);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #A78BFA;
+  background: rgba(139, 92, 246, 0.65);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.35) transparent;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Glassmorphism Styles - Pure Luxury Frosted Glass */

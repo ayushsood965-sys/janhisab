@@ -13,7 +13,7 @@ const protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'janhisab_super_secret_civic_key_2026_jwt_token_auth');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'janaudit_super_secret_civic_key_2026_jwt_token_auth');
     req.user = await User.findById(decoded.id).select('-password');
     if (!req.user) {
       return res.status(401).json({ success: false, message: 'User not found.' });
@@ -33,7 +33,7 @@ const optionalAuth = async (req, res, next) => {
 
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'janhisab_super_secret_civic_key_2026_jwt_token_auth');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'janaudit_super_secret_civic_key_2026_jwt_token_auth');
       req.user = await User.findById(decoded.id).select('-password');
     } catch (err) {
       // Ignore error for optional auth

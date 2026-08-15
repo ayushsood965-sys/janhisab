@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏛️ JanHisab (जन हिसाब)
+# 🏛️ JanAudit (जन ऑडिट)
 ### **India's Citizen-Led Public Accountability & Civic-Tech Platform**
 
 *Empowering 1.4 Billion Citizens with Radical Governance Transparency, Real-Time Civic Audits, and Direct Democratic Accountability.*
@@ -19,11 +19,11 @@
 
 </div>
 
-## 📌 About JanHisab
+## 📌 About JanAudit
 
-**JanHisab** (*Jan* = People, *Hisab* = Accountability/Audit) is a full-stack, real-time civic-tech ecosystem built for Indian democracy. It bridges the gap between citizens, elected representatives (MPs, MLAs, Councillors), and public administrative institutions. 
+**JanAudit** (*Jan* = People, *Audit* = Accountability/Verification) is a full-stack, real-time civic-tech ecosystem built for Indian democracy. It bridges the gap between citizens, elected representatives (MPs, MLAs, Councillors), and public administrative institutions. 
 
-By unifying crowd-sourced grievance reporting, verified electoral promise tracking, instant RTI drafting, interactive GIS constituency heatmaps, and gamified civic participation, JanHisab transforms passive voters into active custodians of democracy.
+By unifying crowd-sourced grievance reporting, verified electoral promise tracking, instant RTI drafting, interactive GIS constituency heatmaps, and gamified civic participation, JanAudit transforms passive voters into active custodians of democracy.
 
 ---
 
@@ -110,8 +110,8 @@ By unifying crowd-sourced grievance reporting, verified electoral promise tracki
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/ayushsood965-sys/janhisab.git
-cd janhisab
+git clone https://github.com/ayushsood965-sys/janaudit.git
+cd janaudit
 ```
 
 ### 2. Install Dependencies
@@ -132,7 +132,7 @@ cd ..
 **Backend (`server/.env`)**:
 ```env
 PORT=5001
-MONGODB_URI=mongodb://127.0.0.1:27017/janhisab
+MONGODB_URI=mongodb://127.0.0.1:27017/janaudit
 JWT_SECRET=your_secure_jwt_secret_key_here
 CLIENT_URL=http://localhost:5173
 NODE_ENV=development
@@ -160,9 +160,9 @@ Use any of these pre-seeded accounts to explore different access levels (Passwor
 
 | Role | Email | Password | Console URL |
 |---|---|---|---|
-| **Super Admin** | `admin@janhisab.org` | `password123` | `/dashboard` or `/admin/cms` |
+| **Super Admin** | `admin@janaudit.org` | `password123` | `/dashboard` or `/admin/cms` |
 | **Elected Representative** | `mla.rajesh@delhiassembly.gov.in` | `password123` | `/dashboard` |
-| **Community Moderator** | `moderator@janhisab.org` | `password123` | `/dashboard` |
+| **Community Moderator** | `moderator@janaudit.org` | `password123` | `/dashboard` |
 | **Citizen (Whistleblower)** | `priya.sharma@example.com` | `password123` | `/dashboard` |
 
 ---
@@ -170,7 +170,7 @@ Use any of these pre-seeded accounts to explore different access levels (Passwor
 ## 📁 Directory Structure
 
 ```plaintext
-janhisab/
+janaudit/
 ├── package.json               # Root workspace scripts (concurrently dev runner)
 ├── server/                    # Node.js + Express + Socket.IO Backend
 │   ├── config/                # Database & server configuration
@@ -234,7 +234,7 @@ janhisab/
 
 ## 🤝 Contributing
 
-Contributions to JanHisab are wholeheartedly welcome!
+Contributions to JanAudit are wholeheartedly welcome!
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/CivicInnovation`)

@@ -58,7 +58,7 @@ export default function DashboardLayout({
                   <Landmark className="w-full h-full text-white stroke-[2.5]" />
                 </div>
                 <span className="text-xl font-black tracking-tight text-slate-900 font-['Outfit']">
-                  Jan<span className="text-brand-600">Hisab</span>
+                  Jan<span className="text-brand-600">Audit</span>
                 </span>
               </Link>
 
@@ -197,7 +197,7 @@ export default function DashboardLayout({
               <span>Democracy Vault</span>
             </p>
             <p className="text-[11px] leading-relaxed">
-              All actions are signed and cryptographically immutabilized on the JanHisab audit trail.
+              All actions are signed and cryptographically immutabilized on the JanAudit audit trail.
             </p>
           </div>
         </aside>

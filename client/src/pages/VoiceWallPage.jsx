@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getPosts, reactToPost, corroboratePost, boostPost, votePoll, commentOnPost, summarizeIssue, getPoliticiansTicker } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { useToast } from '../context/ToastContext';
 import CivicScaleMotion, { VerifiedShieldMotion } from '../components/common/LottieAnimation';
 import {
   Flame,
@@ -42,6 +43,7 @@ const REACTION_CONFIG = [
 
 export default function VoiceWallPage({ showCreateModal, onCloseCreateModal }) {
   const { user, isAuthenticated, updateUserPoints } = useAuth();
+  const { toast } = useToast();
   const socket = useSocket();
   const [posts, setPosts] = useState([]);
   const [tickerData, setTickerData] = useState({ wallOfFame: [], wallOfShame: [] });
@@ -102,7 +104,7 @@ export default function VoiceWallPage({ showCreateModal, onCloseCreateModal }) {
 
   const handleReact = async (postId, reactionKey) => {
     if (!isAuthenticated) {
-      alert('Please log in or register an anonymous handle to react.');
+      toast.warning('Please log in or create an anonymous account to react.', 'Authentication Required');
       return;
     }
     try {
@@ -125,18 +127,19 @@ export default function VoiceWallPage({ showCreateModal, onCloseCreateModal }) {
       }
     } catch (err) {
       console.error(err);
+      toast.error(err.response?.data?.message || 'Error recording reaction');
     }
   };
 
   const handleCorroborate = async (postId) => {
     if (!isAuthenticated) {
-      alert('Please log in to corroborate.');
+      toast.warning('Please log in to corroborate this citizen report.', 'Authentication Required');
       return;
     }
     try {
       const res = await corroboratePost(postId);
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message || 'Report corroborated successfully! +15 XP');
         setPosts((prev) =>
           prev.map((p) =>
             p._id === postId
@@ -151,43 +154,44 @@ export default function VoiceWallPage({ showCreateModal, onCloseCreateModal }) {
         );
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error corroborating');
+      toast.error(err.response?.data?.message || 'Error corroborating post');
     }
   };
 
   const handleBoost = async (postId) => {
     if (!isAuthenticated) {
-      alert('Please log in to spend Janta Points.');
+      toast.warning('Please log in to spend Janta Points on issue boosts.', 'Authentication Required');
       return;
     }
     try {
       const res = await boostPost(postId, 50);
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message || 'Post boosted on Voice Wall! Priority escalation active.');
         updateUserPoints(res.data.userRemainingPoints);
         setPosts((prev) =>
           prev.map((p) => (p._id === postId ? { ...p, boostScore: res.data.boostScore } : p))
         );
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error boosting post');
+      toast.error(err.response?.data?.message || 'Error boosting post');
     }
   };
 
   const handlePollVote = async (postId, optionIndex) => {
     if (!isAuthenticated) {
-      alert('Please log in to vote in polls.');
+      toast.warning('Please log in to vote in citizen polls.', 'Authentication Required');
       return;
     }
     try {
       const res = await votePoll(postId, optionIndex);
       if (res.data.success) {
+        toast.success('Vote counted! Quadratic confidence dampener applied.');
         setPosts((prev) =>
           prev.map((p) => (p._id === postId ? { ...p, pollData: res.data.pollData } : p))
         );
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error voting');
+      toast.error(err.response?.data?.message || 'Error recording poll vote');
     }
   };
 
@@ -196,13 +200,14 @@ export default function VoiceWallPage({ showCreateModal, onCloseCreateModal }) {
     try {
       const res = await commentOnPost(postId, { content: commentText });
       if (res.data.success) {
+        toast.success('Comment published to public audit trail!');
         setPosts((prev) =>
           prev.map((p) => (p._id === postId ? { ...p, comments: res.data.comments } : p))
         );
         setCommentText('');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error adding comment');
+      toast.error(err.response?.data?.message || 'Error adding comment');
     }
   };
 

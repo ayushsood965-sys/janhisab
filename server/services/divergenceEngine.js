@@ -1,5 +1,5 @@
 /**
- * JanHisab Divergence Detection Engine (Rotten Tomatoes Dual-Score Weapon)
+ * JanAudit Divergence Detection Engine (Rotten Tomatoes Dual-Score Weapon)
  * Detects discrepancies between Objective Kaam Score and Janta Voice Sentiment.
  */
 

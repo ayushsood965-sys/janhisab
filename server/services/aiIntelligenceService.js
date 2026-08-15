@@ -1,5 +1,5 @@
 /**
- * JanHisab AI Services Suite
+ * JanAudit AI Services Suite
  * - 5-Line Issue Summarizer
  * - "Sach Bol" Fact-Check Engine
  * - Anomaly & IT Cell NLP Spam Clustering Detector
@@ -36,12 +36,12 @@ function runSachBolFactCheck(claimText, entityName = '') {
     verdict = 'EXAGGERATED_CLAIM';
     truthScore = 30;
     explanation = 'Manifesto audit reveals 4 out of 15 targeted projects delivered; overall completion sits at 34%.';
-    primarySource = 'JanHisab AI Wada Tracker & ECI Filed Election Affidavits';
+    primarySource = 'JanAudit AI Wada Tracker & ECI Filed Election Affidavits';
   } else if (lowerClaim.includes('hospital') || lowerClaim.includes('school') || lowerClaim.includes('road')) {
     verdict = 'GROUND_EVIDENCE_CONFIRMED';
     truthScore = 88;
     explanation = 'Multiple geotagged photos from 14 verified local citizens confirm operational shortfall.';
-    primarySource = 'JanHisab Geotagged Local Citizen Evidence Pool (Corroborated)';
+    primarySource = 'JanAudit Geotagged Local Citizen Evidence Pool (Corroborated)';
   }
 
   return {

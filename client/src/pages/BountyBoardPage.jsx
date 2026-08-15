@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getBounties, contributeBounty, submitBountyProof, getGhotalaAwards, voteGhotalaAward } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import confetti from 'canvas-confetti';
 import {
   Target,
@@ -18,6 +19,7 @@ import {
 
 export default function BountyBoardPage() {
   const { user, isAuthenticated, updateUserPoints } = useAuth();
+  const { toast } = useToast();
   const [bounties, setBounties] = useState([]);
   const [ghotalaAwards, setGhotalaAwards] = useState([]);
   const [activeTab, setActiveTab] = useState('bounties');
@@ -58,20 +60,20 @@ export default function BountyBoardPage() {
   const handleContributeSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in to pool Janta Points into investigation bounties.');
+      toast.warning('Please log in to pool Janta Points into investigation bounties.', 'Authentication Required');
       return;
     }
     setContributing(true);
     try {
       const res = await contributeBounty(selectedBounty._id, contribPoints);
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message || 'Points pooled to investigation escrow!', 'Bounty Funded');
         updateUserPoints(res.data.userRemainingPoints);
         setSelectedBounty(null);
         fetchBountyData();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error contributing to bounty');
+      toast.error(err.response?.data?.message || 'Error contributing to bounty');
     } finally {
       setContributing(false);
     }
@@ -80,7 +82,7 @@ export default function BountyBoardPage() {
   const handleProofSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in to submit investigation proof.');
+      toast.warning('Please log in to submit investigation proof.', 'Authentication Required');
       return;
     }
     setSubmittingProof(true);
@@ -92,7 +94,7 @@ export default function BountyBoardPage() {
       });
 
       if (res.data.success) {
-        alert('🎉 Investigation evidence submitted for Community Jury verification!');
+        toast.success('Investigation evidence submitted for Community Jury verification!', 'Evidence Logged');
         setProofBounty(null);
         setProofTitle('');
         setProofUrl('');
@@ -100,7 +102,7 @@ export default function BountyBoardPage() {
         fetchBountyData();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error submitting proof');
+      toast.error(err.response?.data?.message || 'Error submitting proof');
     } finally {
       setSubmittingProof(false);
     }
@@ -108,18 +110,18 @@ export default function BountyBoardPage() {
 
   const handleVoteAward = async (nomineeId) => {
     if (!isAuthenticated) {
-      alert('Please log in to vote in Weekly Ghotala Awards.');
+      toast.warning('Please log in to vote in Weekly Ghotala Awards.', 'Authentication Required');
       return;
     }
     try {
       const res = await voteGhotalaAward(nomineeId);
       if (res.data.success) {
         confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
-        alert(res.data.message);
+        toast.success(res.data.message || 'Vote registered in Weekly Ghotala Awards!', 'Vote Cast');
         fetchBountyData();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error voting award');
+      toast.error(err.response?.data?.message || 'Error voting award');
     }
   };
 

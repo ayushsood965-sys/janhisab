@@ -5,7 +5,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('janhisab_token') || null);
+  const [token, setToken] = useState(localStorage.getItem('janaudit_token') || localStorage.getItem('janhisab_token') || null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
           setUser(res.data.user);
         } catch (err) {
           console.warn('Session expired or invalid token');
+          localStorage.removeItem('janaudit_token');
           localStorage.removeItem('janhisab_token');
           setToken(null);
           setUser(null);
@@ -30,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (identifier, password) => {
     const res = await loginUser({ identifier, password });
     if (res.data.success) {
-      localStorage.setItem('janhisab_token', res.data.token);
+      localStorage.setItem('janaudit_token', res.data.token);
       setToken(res.data.token);
       setUser(res.data.user);
       return res.data;
@@ -49,7 +50,7 @@ export const AuthProvider = ({ children }) => {
       otp,
     });
     if (res.data.success) {
-      localStorage.setItem('janhisab_token', res.data.token);
+      localStorage.setItem('janaudit_token', res.data.token);
       setToken(res.data.token);
       setUser(res.data.user);
       return res.data;
@@ -57,6 +58,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    localStorage.removeItem('janaudit_token');
     localStorage.removeItem('janhisab_token');
     setToken(null);
     setUser(null);

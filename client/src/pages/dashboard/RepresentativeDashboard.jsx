@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import {
   getPosts,
   submitRepresentativeReply,
@@ -37,6 +38,7 @@ const SIDEBAR_ITEMS = [
 
 export default function RepresentativeDashboard() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('issues');
 
   // Issues & Right of Reply state
@@ -130,10 +132,10 @@ export default function RepresentativeDashboard() {
         setSelectedIssueForReply(null);
         setReplyText('');
         setProofImage('');
-        alert('Official Right of Reply published!');
+        toast.success('Official Right of Reply published to public record!', 'Response Published');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error submitting reply');
+      toast.error(err.response?.data?.message || 'Error submitting reply');
     }
   };
 
@@ -152,7 +154,7 @@ export default function RepresentativeDashboard() {
           setPromises((prev) =>
             prev.map((p) => (p._id === editingPromise._id ? res.data.promise : p))
           );
-          alert('Promise progress updated!');
+          toast.success('Promise progress updated!');
         }
       } else {
         const res = await createPromise({
@@ -164,7 +166,7 @@ export default function RepresentativeDashboard() {
         });
         if (res.data.success) {
           setPromises((prev) => [res.data.promise, ...prev]);
-          alert('Manifesto promise added!');
+          toast.success('Manifesto promise added to public tracker!', 'Promise Added');
         }
       }
       setShowPromiseModal(false);
@@ -172,7 +174,7 @@ export default function RepresentativeDashboard() {
       setPromiseTitle('');
       setPromiseDesc('');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error saving promise');
+      toast.error(err.response?.data?.message || 'Error saving promise');
     }
   };
 
@@ -181,9 +183,9 @@ export default function RepresentativeDashboard() {
     try {
       await deletePromise(id);
       setPromises((prev) => prev.filter((p) => p._id !== id));
-      alert('Promise deleted.');
+      toast.info('Promise deleted.');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error deleting promise');
+      toast.error(err.response?.data?.message || 'Error deleting promise');
     }
   };
 
@@ -194,7 +196,7 @@ export default function RepresentativeDashboard() {
       setAnnouncements((prev) =>
         prev.map((a) => (a.id === editingAnn.id ? { ...a, title: annTitle, content: annContent } : a))
       );
-      alert('Bulletin updated successfully!');
+      toast.success('Bulletin updated successfully!');
     } else {
       const newAnn = {
         id: `ann_${Date.now()}`,
@@ -203,7 +205,7 @@ export default function RepresentativeDashboard() {
         date: new Date(),
       };
       setAnnouncements((prev) => [newAnn, ...prev]);
-      alert('Official bulletin published!');
+      toast.success('Official bulletin published!', 'Bulletin Live');
     }
     setShowAnnModal(false);
     setEditingAnn(null);
@@ -214,12 +216,12 @@ export default function RepresentativeDashboard() {
   const handleDeleteAnnouncement = (id) => {
     if (!window.confirm('Delete this bulletin?')) return;
     setAnnouncements((prev) => prev.filter((a) => a.id !== id));
-    alert('Bulletin removed.');
+    toast.info('Bulletin removed.');
   };
 
   const handleUpdateCredentials = (e) => {
     e.preventDefault();
-    alert('Credentials updated! Submitted to Lokpal Super Admin verification queue.');
+    toast.success('Credentials updated! Submitted to Lokpal Super Admin verification queue.', 'Profile Submitted');
   };
 
   return (

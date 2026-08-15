@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getPetitions, createPetition, signPetition, getPoliticians } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import confetti from 'canvas-confetti';
 import {
   Flag,
@@ -20,6 +21,7 @@ import {
 
 export default function PetitionsPage() {
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [petitions, setPetitions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -58,25 +60,25 @@ export default function PetitionsPage() {
 
   const handleSign = async (petitionId) => {
     if (!isAuthenticated) {
-      alert('Please log in or register an anonymous handle to sign.');
+      toast.warning('Please log in or create an anonymous handle to sign.', 'Authentication Required');
       return;
     }
     try {
       const res = await signPetition(petitionId, { comment: 'Signed in public interest.' });
       if (res.data.success) {
         confetti({ particleCount: 60, spread: 60, origin: { y: 0.7 } });
-        alert(res.data.message);
+        toast.success(res.data.message || 'Petition signed! Notification dispatched.', 'Petition Signed');
         fetchPetitionsList();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error signing petition');
+      toast.error(err.response?.data?.message || 'Error signing petition');
     }
   };
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in to launch a petition.');
+      toast.warning('Please log in to launch a petition.', 'Authentication Required');
       return;
     }
     setSubmitting(true);
@@ -92,7 +94,7 @@ export default function PetitionsPage() {
       });
 
       if (res.data.success) {
-        alert('🎉 Petition launched successfully! Auto-notice dispatch enabled.');
+        toast.success('Petition launched successfully! Auto-notice dispatch enabled.', 'Petition Active');
         setShowCreateModal(false);
         setTitle('');
         setDescription('');
@@ -101,7 +103,7 @@ export default function PetitionsPage() {
         fetchPetitionsList();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error launching petition');
+      toast.error(err.response?.data?.message || 'Error launching petition');
     } finally {
       setSubmitting(false);
     }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getInstitutions, submitInstitutionFeedback } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import {
   Building2,
   Search,
@@ -27,6 +28,7 @@ const CATEGORIES = [
 
 export default function InstitutionsPage() {
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [institutions, setInstitutions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('All');
@@ -68,7 +70,7 @@ export default function InstitutionsPage() {
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Please log in to submit structured feedback.');
+      toast.warning('Please log in to submit structured feedback.', 'Authentication Required');
       return;
     }
     setSubmittingFeedback(true);
@@ -77,12 +79,12 @@ export default function InstitutionsPage() {
         dimensions: feedbackDims,
       });
       if (res.data.success) {
-        alert('🎉 Structured feedback recorded! Earned +15 XP.');
+        toast.success('Structured feedback recorded! Earned +15 XP.', 'Audit Recorded');
         setSelectedInst(null);
         fetchInstitutionsList();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error submitting feedback');
+      toast.error(err.response?.data?.message || 'Error submitting feedback');
     } finally {
       setSubmittingFeedback(false);
     }

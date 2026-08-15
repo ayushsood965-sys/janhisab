@@ -23,7 +23,7 @@ function hashIdentifier(rawPhone) {
 }
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'janhisab_super_secret_civic_key_2026_jwt_token_auth', {
+  return jwt.sign({ id }, process.env.JWT_SECRET || 'janaudit_super_secret_civic_key_2026_jwt_token_auth', {
     expiresIn: '30d',
   });
 };
@@ -48,7 +48,7 @@ router.post('/signup', async (req, res) => {
     }
 
     const assignedRole = ['citizen', 'representative', 'moderator'].includes(role) ? role : 'citizen';
-    const finalEmail = email ? email.trim().toLowerCase() : `anon_${Date.now()}@janhisab.org`;
+    const finalEmail = email ? email.trim().toLowerCase() : `anon_${Date.now()}@janaudit.org`;
 
     // Check if email already registered
     const existingEmail = await User.findOne({ email: finalEmail });
@@ -90,7 +90,7 @@ router.post('/signup', async (req, res) => {
           id: 'democray_pioneer',
           name: 'Democracy Pioneer',
           icon: '🗳️',
-          description: 'Joined the JanHisab civic accountability movement',
+          description: 'Joined the JanAudit civic accountability movement',
         },
       ],
     });

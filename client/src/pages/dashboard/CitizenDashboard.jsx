@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import {
   getPosts,
   createPost,
@@ -46,6 +47,7 @@ const SIDEBAR_ITEMS = [
 
 export default function CitizenDashboard() {
   const { user, verifyUpi } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('reports');
 
   // Reports state (CRUD)
@@ -147,7 +149,7 @@ export default function CitizenDashboard() {
         });
         if (res.data.success) {
           setReports((prev) => prev.map((p) => (p._id === editingReport._id ? res.data.post : p)));
-          alert('Report updated successfully!');
+          toast.success('Report updated successfully!');
         }
       } else {
         const res = await createPost({
@@ -161,7 +163,7 @@ export default function CitizenDashboard() {
         });
         if (res.data.success) {
           setReports((prev) => [res.data.post, ...prev]);
-          alert('Civic report created and posted to Voice Wall!');
+          toast.success('Civic report created and posted to Voice Wall!', 'Report Published');
         }
       }
       setShowCreateReportModal(false);
@@ -170,7 +172,7 @@ export default function CitizenDashboard() {
       setReportContent('');
       setReportProofUrl('');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error saving report');
+      toast.error(err.response?.data?.message || 'Error saving report');
     }
   };
 
@@ -179,9 +181,9 @@ export default function CitizenDashboard() {
     try {
       await deletePost(id);
       setReports((prev) => prev.filter((p) => p._id !== id));
-      alert('Report withdrawn.');
+      toast.info('Report withdrawn.');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error deleting report');
+      toast.error(err.response?.data?.message || 'Error deleting report');
     }
   };
 
@@ -199,7 +201,7 @@ export default function CitizenDashboard() {
         });
         if (res.data.success) {
           setPetitions((prev) => prev.map((p) => (p._id === editingPetition._id ? res.data.petition : p)));
-          alert('Petition updated successfully!');
+          toast.success('Petition updated successfully!');
         }
       } else {
         const res = await createPetition({
@@ -211,7 +213,7 @@ export default function CitizenDashboard() {
         });
         if (res.data.success) {
           setPetitions((prev) => [res.data.petition, ...prev]);
-          alert('Petition published!');
+          toast.success('Petition published!', 'Petition Active');
         }
       }
       setShowCreatePetitionModal(false);
@@ -219,7 +221,7 @@ export default function CitizenDashboard() {
       setPetitionTitle('');
       setPetitionDesc('');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error saving petition');
+      toast.error(err.response?.data?.message || 'Error saving petition');
     }
   };
 
@@ -228,9 +230,9 @@ export default function CitizenDashboard() {
     try {
       await deletePetition(id);
       setPetitions((prev) => prev.filter((p) => p._id !== id));
-      alert('Petition deleted.');
+      toast.info('Petition deleted.');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error deleting petition');
+      toast.error(err.response?.data?.message || 'Error deleting petition');
     }
   };
 
@@ -248,10 +250,10 @@ export default function CitizenDashboard() {
       if (res.data.success) {
         setShowRtiModal(false);
         fetchMyRtis();
-        alert('Form "A" RTI Application generated and added to your vault!');
+        toast.success('Form "A" RTI Application generated and added to your vault!', 'RTI Ready');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error creating RTI');
+      toast.error(err.response?.data?.message || 'Error creating RTI');
     }
   };
 
@@ -272,17 +274,17 @@ export default function CitizenDashboard() {
         setUploadDocUrl('');
         setUploadDocSummary('');
         fetchMyRtis();
-        alert('🎉 RTI response successfully uploaded to public vault! +100 XP awarded.');
+        toast.success('RTI response successfully uploaded to public vault! +100 XP awarded.', 'RTI Published');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error uploading RTI response');
+      toast.error(err.response?.data?.message || 'Error uploading RTI response');
     }
   };
 
   const handleDeleteRti = (index) => {
     if (!window.confirm('Remove this draft RTI entry from your console?')) return;
     setRtis((prev) => prev.filter((_, i) => i !== index));
-    alert('RTI draft removed.');
+    toast.info('RTI draft removed.');
   };
 
   return (
@@ -574,7 +576,7 @@ export default function CitizenDashboard() {
                 <button
                   onClick={async () => {
                     await verifyUpi();
-                    alert('🎉 ₹11 Verified Nagrik badge activated! 3x quadratic voting weight enabled.');
+                    toast.success('₹11 Verified Nagrik badge activated! 3x quadratic voting weight enabled.', 'Verification Active');
                   }}
                   className="px-3 py-1 rounded-xl bg-amber-500 text-black text-xs font-black hover:bg-amber-400"
                 >
@@ -651,7 +653,7 @@ export default function CitizenDashboard() {
             </div>
 
             <button
-              onClick={() => alert('Settings updated!')}
+              onClick={() => toast.success('Preferences saved successfully!')}
               className="px-6 py-2.5 rounded-2xl bg-gradient-cta text-white font-black text-xs hover:shadow-purple-glow font-['Outfit'] shadow-md"
             >
               Save Profile Preferences

@@ -1,7 +1,7 @@
 {
-  "name": "janhisab-server",
+  "name": "janaudit-server",
   "version": "1.0.0",
-  "description": "Backend API Server for JanHisab Civic Accountability Platform",
+  "description": "Backend API Server for JanAudit Civic Accountability Platform",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

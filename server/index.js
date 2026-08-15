@@ -89,7 +89,7 @@ app.use('/api/cms', cmsRoutes);
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
-    platform: 'JanHisab (JanAudit) Civic Accountability Platform',
+    platform: 'JanAudit Civic Accountability Platform',
     version: '1.0.0',
     uptime: process.uptime(),
     timestamp: new Date(),
@@ -130,7 +130,7 @@ connectDB().then(async () => {
   }
 
   server.listen(PORT, () => {
-    console.log(`🚀 JanHisab API Server running on port ${PORT}`);
+    console.log(`🚀 JanAudit API Server running on port ${PORT}`);
     console.log(`📡 Real-time Socket.io active on ws://localhost:${PORT}`);
   });
 }).catch((err) => {

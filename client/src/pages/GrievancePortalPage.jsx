@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fileGrievance, trackGrievance, getJuryQueue, voteJuryQueue } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import {
   Scale,
   ShieldCheck,
@@ -16,6 +17,7 @@ import {
 
 export default function GrievancePortalPage() {
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('file');
 
   // File Form State
@@ -70,9 +72,10 @@ export default function GrievancePortalPage() {
 
       if (res.data.success) {
         setFiledTicket(res.data.grievance);
+        toast.success('Grievance filed under IT Rules 2021. 36h statutory timer started.', 'Ticket Filed');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error filing grievance');
+      toast.error(err.response?.data?.message || 'Error filing grievance');
     } finally {
       setFiling(false);
     }
@@ -86,9 +89,10 @@ export default function GrievancePortalPage() {
       const res = await trackGrievance(trackingNumber.trim());
       if (res.data.success) {
         setTrackedGrievance(res.data.grievance);
+        toast.success('Grievance status retrieved successfully.');
       }
     } catch (err) {
-      alert('Grievance tracking ID not found');
+      toast.error('Grievance tracking ID not found');
     } finally {
       setTrackingLoading(false);
     }
@@ -96,17 +100,17 @@ export default function GrievancePortalPage() {
 
   const handleJuryVote = async (grievanceId, voteDecision) => {
     if (!isAuthenticated) {
-      alert('Please log in as a verified Sakriya/Guardian nagrik to vote in Community Jury.');
+      toast.warning('Please log in as a verified Sakriya/Guardian nagrik to vote in Community Jury.', 'Authentication Required');
       return;
     }
     try {
       const res = await voteJuryQueue(grievanceId, voteDecision);
       if (res.data.success) {
-        alert(res.data.message);
+        toast.success(res.data.message || 'Jury vote registered cryptographically!', 'Vote Recorded');
         fetchJury();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error voting on moderation queue');
+      toast.error(err.response?.data?.message || 'Error voting on moderation queue');
     }
   };
 
@@ -132,7 +136,7 @@ export default function GrievancePortalPage() {
           <div className="p-5 rounded-3xl bg-white border border-brand-200 shadow-glass space-y-1 text-xs shrink-0">
             <span className="text-[10px] text-emerald-800 uppercase font-mono block font-bold">Appointed Grievance Officer:</span>
             <p className="font-bold text-textPrimary">Adv. R. Narayanan</p>
-            <p className="text-textMuted font-mono text-[11px]">grievance@janhisab.org</p>
+            <p className="text-textMuted font-mono text-[11px]">grievance@janaudit.org</p>
             <p className="text-[10px] text-textSecondary pt-1 border-t border-brand-100">SLA: 24h Ack • 15 Days Resolution</p>
           </div>
         </div>
@@ -245,7 +249,7 @@ export default function GrievancePortalPage() {
                   required
                   value={targetUrl}
                   onChange={(e) => setTargetUrl(e.target.value)}
-                  placeholder="https://janhisab.org/posts/... or post ID"
+                  placeholder="https://janaudit.org/posts/... or post ID"
                   className="w-full px-4 py-2.5 rounded-2xl bg-white border border-brand-200 text-textPrimary focus:outline-none focus:border-brand-500 shadow-xs"
                 />
               </div>

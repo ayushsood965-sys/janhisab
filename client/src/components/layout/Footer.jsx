@@ -17,7 +17,7 @@ export default function Footer() {
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-700 to-indigo-600 flex items-center justify-center text-lg text-white shadow-purple-glow">
                 🏛️
               </div>
-              <span className="text-xl font-extrabold text-gradient-hero font-['Outfit']">JanHisab</span>
+              <span className="text-xl font-extrabold text-gradient-hero font-['Outfit']">JanAudit</span>
             </div>
             <p className="text-textSecondary text-xs leading-relaxed">
               India's Citizen-Powered Public Accountability Platform. Every promise tracked, every claim evidenced, every score explainable.
@@ -86,7 +86,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-brand-100 flex flex-col sm:flex-row items-center justify-between text-[11px] text-textMuted">
-          <p>© 2026 JanHisab Civic Platform. Open Source Data from ADR, PRS India, ECI & Digital Sansad.</p>
+          <p>© 2026 JanAudit Civic Platform. Open Source Data from ADR, PRS India, ECI & Digital Sansad.</p>
           <div className="flex items-center space-x-4 mt-3 sm:mt-0">
             <span className="font-semibold text-textSecondary">Legal Defense Fund: 5% Reserved</span>
             <span>•</span>

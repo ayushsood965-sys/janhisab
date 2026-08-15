@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import {
   getPendingVerifications,
   verifyUserApplication,
@@ -48,6 +49,7 @@ const SIDEBAR_ITEMS = [
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('verification');
 
   // Pending Verifications state
@@ -169,10 +171,10 @@ export default function AdminDashboard() {
       const res = await verifyUserApplication({ targetUserId, action });
       if (res.data.success) {
         setPendingUsers((prev) => prev.filter((u) => u._id !== targetUserId));
-        alert(res.data.message);
+        toast.success(res.data.message || `Application ${action}d successfully!`);
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error processing verification');
+      toast.error(err.response?.data?.message || 'Error processing verification');
     }
   };
 
@@ -184,10 +186,10 @@ export default function AdminDashboard() {
         setUsersList((prev) =>
           prev.map((u) => (u._id === userId ? { ...u, role: newRole } : u))
         );
-        alert(`User role updated to ${newRole}`);
+        toast.success(`User role updated to ${newRole}`);
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error changing role');
+      toast.error(err.response?.data?.message || 'Error changing role');
     }
   };
 
@@ -199,9 +201,10 @@ export default function AdminDashboard() {
         setUsersList((prev) =>
           prev.map((u) => (u._id === userId ? { ...u, isLocked: res.data.isLocked } : u))
         );
+        toast.info(res.data.isLocked ? 'User account locked' : 'User account unlocked');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error locking user');
+      toast.error(err.response?.data?.message || 'Error locking user');
     }
   };
 
@@ -213,8 +216,9 @@ export default function AdminDashboard() {
         ...prev,
         modules: { ...prev?.modules, [moduleKey]: isEnabled },
       }));
+      toast.info(`Module ${moduleKey} toggled.`);
     } catch (err) {
-      alert(err.response?.data?.message || 'Error toggling module');
+      toast.error(err.response?.data?.message || 'Error toggling module');
     }
   };
 
@@ -223,13 +227,13 @@ export default function AdminDashboard() {
     try {
       const total = Object.values(weights).reduce((a, b) => a + Number(b), 0);
       if (total !== 100) {
-        alert(`Weights must sum to exactly 100%. Current total: ${total}%`);
+        toast.warning(`Weights must sum to exactly 100%. Current total: ${total}%`, 'Invalid Weight Distribution');
         return;
       }
       await updateCmsFormulaWeights(weights);
-      alert('Impact Score™ mathematical weights updated across all 543 politicians!');
+      toast.success('Impact Score™ mathematical weights updated across all 543 politicians!', 'Weights Saved');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error updating formula weights');
+      toast.error(err.response?.data?.message || 'Error updating formula weights');
     }
   };
 
@@ -250,7 +254,7 @@ export default function AdminDashboard() {
           setPoliticians((prev) =>
             prev.map((p) => (p._id === editingPolitician._id ? res.data.politician : p))
           );
-          alert('Politician master record updated!');
+          toast.success('Politician master record updated!');
         }
       } else {
         const res = await createPolitician({
@@ -263,14 +267,14 @@ export default function AdminDashboard() {
         });
         if (res.data.success) {
           setPoliticians((prev) => [res.data.politician, ...prev]);
-          alert('New Politician registered in Master Registry!');
+          toast.success('New Politician registered in Master Registry!', 'Politician Registered');
         }
       }
       setShowPoliticianModal(false);
       setEditingPolitician(null);
       setPolName('');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error saving politician');
+      toast.error(err.response?.data?.message || 'Error saving politician');
     }
   };
 
@@ -279,9 +283,9 @@ export default function AdminDashboard() {
     try {
       await deletePolitician(id);
       setPoliticians((prev) => prev.filter((p) => p._id !== id));
-      alert('Politician profile removed.');
+      toast.info('Politician profile removed.');
     } catch (err) {
-      alert(err.response?.data?.message || 'Error deleting profile');
+      toast.error(err.response?.data?.message || 'Error deleting profile');
     }
   };
 

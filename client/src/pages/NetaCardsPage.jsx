@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getNetaCards, unlockNetaCard, getUserDeck } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import confetti from 'canvas-confetti';
 import {
   CreditCard,
@@ -14,6 +15,7 @@ import {
 
 export default function NetaCardsPage() {
   const { user, isAuthenticated, updateUserPoints } = useAuth();
+  const { toast } = useToast();
   const [cards, setCards] = useState([]);
   const [userDeck, setUserDeck] = useState([]);
   const [activeTab, setActiveTab] = useState('all_cards');
@@ -41,19 +43,19 @@ export default function NetaCardsPage() {
 
   const handleUnlock = async (cardId) => {
     if (!isAuthenticated) {
-      alert('Please log in to unlock collectible Neta cards.');
+      toast.warning('Please log in to unlock collectible Neta cards.', 'Authentication Required');
       return;
     }
     try {
       const res = await unlockNetaCard(cardId);
       if (res.data.success) {
         confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-        alert(res.data.message);
+        toast.success(res.data.message || 'Neta Card unlocked and added to your Deck!', 'Card Unlocked');
         updateUserPoints(res.data.userRemainingPoints);
         fetchCards();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Error unlocking card');
+      toast.error(err.response?.data?.message || 'Error unlocking card');
     }
   };
 
