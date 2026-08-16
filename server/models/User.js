@@ -27,10 +27,20 @@ const userSchema = new mongoose.Schema(
       enum: ['VERIFIED', 'PENDING_EMAIL_VERIFICATION', 'PENDING_ADMIN_VERIFICATION', 'REJECTED'],
       default: 'PENDING_EMAIL_VERIFICATION',
     },
-    emailOtp: {
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: {
       type: String,
     },
-    emailOtpExpires: {
+    emailVerificationExpires: {
+      type: Date,
+    },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpires: {
       type: Date,
     },
     credentialsDoc: {

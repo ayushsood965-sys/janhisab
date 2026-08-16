@@ -1,62 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { checkUsernameAvailability } from '../../services/api';
 import {
   X,
   ShieldCheck,
   RefreshCw,
   Lock,
-  UserCheck,
-  Key,
-  Sparkles,
   Mail,
   User,
-  MapPin,
-  Building,
-  Scale,
-  CheckCircle,
-  AlertTriangle,
+  CheckCircle2,
+  AlertCircle,
   ArrowRight,
+  Sparkles,
+  HelpCircle,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
-const INDIAN_STATES = ['Delhi', 'Maharashtra', 'Karnataka', 'Uttar Pradesh', 'Himachal Pradesh', 'Kerala', 'Tamil Nadu', 'Gujarat', 'Punjab', 'Rajasthan'];
+const INDIAN_STATES = [
+  'Delhi', 'Maharashtra', 'Karnataka', 'Uttar Pradesh', 'Himachal Pradesh',
+  'Kerala', 'Tamil Nadu', 'Gujarat', 'Punjab', 'Rajasthan', 'West Bengal', 'Bihar'
+];
 
 export default function AuthModal({ mode = 'login', onClose, onSwitchMode }) {
-  const { login, signup, verifyEmail } = useAuth();
+  const { login, signup, forgotPassword, resendVerification } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState(mode); // 'login' | 'signup'
-  const [step, setStep] = useState('form'); // 'form' | 'otp'
+  // Tab / Screen Mode: 'login' | 'signup' | 'forgot' | 'verification_sent'
+  const [activeTab, setActiveTab] = useState(mode === 'register' ? 'signup' : mode);
+
+  // Login form state
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   // Signup form state
   const [fullName, setFullName] = useState('');
   const [handle, setHandle] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [role, setRole] = useState('citizen');
   const [state, setState] = useState('Delhi');
   const [constituency, setConstituency] = useState('New Delhi');
   const [credentialsDoc, setCredentialsDoc] = useState('');
 
-  // Login form state
-  const [loginIdentifier, setLoginIdentifier] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  // Real-time username availability state
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState(null); // { available: boolean, message: string, suggestions: [] }
+  const debounceTimerRef = useRef(null);
 
-  // OTP state
-  const [otp, setOtp] = useState('');
-  const [simulatedOtp, setSimulatedOtp] = useState('');
+  // Forgot password form state
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
+
+  // Verification sent confirmation state
   const [registeredEmail, setRegisteredEmail] = useState('');
+  const [resending, setResending] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
 
-  const generateRandomHandle = () => {
-    const prefixes = ['AngryAloo', 'ChaiPeCharcha', 'DeshBhaktNagrik', 'RtiWarrior', 'JantaKaBoss', 'PotholeHunter', 'VikasSeeker', 'LokpalJury'];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const num = Math.floor(1000 + Math.random() * 9000);
-    setHandle(`${prefix}_${num}`);
-  };
+  // Real-time debounced username check
+  useEffect(() => {
+    if (activeTab !== 'signup') return;
+
+    const trimmed = handle.trim();
+    if (!trimmed || trimmed.length < 3) {
+      setUsernameStatus(null);
+      setCheckingUsername(false);
+      return;
+    }
+
+    setCheckingUsername(true);
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+
+    debounceTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await checkUsernameAvailability(trimmed);
+        if (res.data.success) {
+          setUsernameStatus(res.data);
+        }
+      } catch (err) {
+        console.warn('Username check error:', err.message);
+      } finally {
+        setCheckingUsername(false);
+      }
+    }, 350);
+
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, [handle, activeTab]);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -66,8 +104,8 @@ export default function AuthModal({ mode = 'login', onClose, onSwitchMode }) {
     try {
       const res = await login(loginIdentifier, loginPassword);
       if (res && res.success) {
+        toast.success(`Welcome back, @${res.user.handle}!`);
         onClose();
-        // Redirect to role-specific dashboard
         if (res.user.role === 'superadmin') navigate('/dashboard/admin');
         else if (res.user.role === 'representative') navigate('/dashboard/representative');
         else if (res.user.role === 'moderator') navigate('/dashboard/moderator');
@@ -83,13 +121,19 @@ export default function AuthModal({ mode = 'login', onClose, onSwitchMode }) {
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (usernameStatus && !usernameStatus.available) {
+      setError('Please choose an available username before proceeding.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await signup({
         fullName,
-        handle: handle || `Nagrik_${Math.floor(1000 + Math.random() * 9000)}`,
-        email,
+        handle: handle.trim(),
+        email: email.trim(),
         password,
         role,
         state,
@@ -98,88 +142,88 @@ export default function AuthModal({ mode = 'login', onClose, onSwitchMode }) {
       });
 
       if (res && res.success) {
-        setSimulatedOtp(res.otp);
         setRegisteredEmail(res.email || email);
-        setStep('otp');
-        setSuccessMsg(res.message);
+        setActiveTab('verification_sent');
+        toast.success('Registration successful! Verification link sent to your email.');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please check input values.');
+      setError(err.response?.data?.message || 'Registration failed. Please review your details.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOtpSubmit = async (e) => {
+  const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const res = await verifyEmail(registeredEmail || email || handle, otp);
-      if (res && res.success) {
-        onClose();
-        if (res.user.role === 'superadmin') navigate('/dashboard/admin');
-        else if (res.user.role === 'representative') navigate('/dashboard/representative');
-        else if (res.user.role === 'moderator') navigate('/dashboard/moderator');
-        else navigate('/dashboard/citizen');
-      }
+      const res = await forgotPassword(forgotEmail.trim());
+      setForgotSent(true);
+      toast.success('Password reset link dispatched to your email.');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid OTP code. Please try again.');
+      setError(err.response?.data?.message || 'Error processing request.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Quick preset login helper for testing
-  const handleQuickLogin = (presetHandle, presetPassword, presetRole) => {
-    setLoginIdentifier(presetHandle);
-    setLoginPassword(presetPassword);
+  const handleResendVerification = async () => {
+    if (!registeredEmail) return;
+    setResending(true);
+    try {
+      await resendVerification(registeredEmail);
+      toast.success('Fresh verification link dispatched!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error resending verification link');
+    } finally {
+      setResending(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in overflow-y-auto">
-      <div className="bg-white border border-brand-200 rounded-3xl max-w-lg w-full p-8 shadow-2xl relative my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in overflow-y-auto">
+      <div className="bg-white border border-purple-100 rounded-3xl max-w-lg w-full p-7 sm:p-9 shadow-2xl relative my-8">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-slate-900 transition-colors p-2 rounded-2xl hover:bg-brand-50"
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-900 transition-colors p-2 rounded-2xl hover:bg-slate-100"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Modal Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex p-3 bg-gradient-to-tr from-brand-700 to-indigo-600 rounded-2xl shadow-purple-glow mb-3 text-white">
-            <ShieldCheck className="w-7 h-7" />
+          <div className="inline-flex p-3 bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 rounded-2xl shadow-md shadow-violet-500/20 mb-3 text-white">
+            <ShieldCheck className="w-6 h-6 stroke-[2.2]" />
           </div>
-          <h3 className="text-2xl font-black text-slate-900 font-['Outfit']">
-            {step === 'otp'
-              ? 'Verify 6-Digit Email Code'
-              : activeTab === 'login'
-              ? 'Welcome to JanAudit'
-              : 'Join the Accountability Movement'}
+          <h3 className="text-2xl font-black text-slate-900 font-['Outfit'] tracking-tight">
+            {activeTab === 'login' && 'Sign In to JanAudit'}
+            {activeTab === 'signup' && 'Create Your Citizen Account'}
+            {activeTab === 'forgot' && 'Reset Your Password'}
+            {activeTab === 'verification_sent' && 'Verify Your Email'}
           </h3>
           <p className="text-xs text-slate-600 font-medium mt-1">
-            {step === 'otp'
-              ? `Enter the verification code sent to ${registeredEmail}`
-              : activeTab === 'login'
-              ? 'Access your role dashboard and public ledger'
-              : 'Zero Plaintext PII Retained • 2-Tier Role Verification'}
+            {activeTab === 'login' && 'Access verified civic data, citizen ballots & audits'}
+            {activeTab === 'signup' && 'Zero-PII pseudonymous governance • Cryptographically verified'}
+            {activeTab === 'forgot' && 'Enter your email to receive a secure password recovery link'}
+            {activeTab === 'verification_sent' && `We sent an activation link to ${registeredEmail}`}
           </p>
         </div>
 
-        {/* Navigation Tabs (if on form step) */}
-        {step === 'form' && (
-          <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-brand-50/80 border border-brand-200 mb-6">
+        {/* Main Tab Switcher (Visible on Login / Signup) */}
+        {(activeTab === 'login' || activeTab === 'signup') && (
+          <div className="grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-purple-50/70 border border-purple-100 mb-6">
             <button
               onClick={() => {
                 setActiveTab('login');
                 setError('');
               }}
-              className={`py-2.5 rounded-xl text-xs font-black transition-all ${
+              className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'login'
-                  ? 'bg-brand-600 text-white shadow-purple-glow'
-                  : 'text-slate-700 hover:text-brand-700 font-bold'
+                  ? 'bg-white text-violet-700 shadow-sm border border-purple-200/80 font-black'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Sign In
@@ -189,10 +233,10 @@ export default function AuthModal({ mode = 'login', onClose, onSwitchMode }) {
                 setActiveTab('signup');
                 setError('');
               }}
-              className={`py-2.5 rounded-xl text-xs font-black transition-all ${
+              className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'signup'
-                  ? 'bg-brand-600 text-white shadow-purple-glow'
-                  : 'text-slate-700 hover:text-brand-700 font-bold'
+                  ? 'bg-white text-violet-700 shadow-sm border border-purple-200/80 font-black'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Create Account
@@ -200,28 +244,22 @@ export default function AuthModal({ mode = 'login', onClose, onSwitchMode }) {
           </div>
         )}
 
+        {/* Error Alert */}
         {error && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-300 text-xs text-rose-900 font-bold flex items-center space-x-2">
-            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+          <div className="mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 font-medium flex items-center space-x-2 animate-in fade-in duration-150">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        {successMsg && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-xs text-emerald-900 font-bold flex items-center space-x-2">
-            <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-        )}
-
         {/* ========================================================================= */}
-        {/* TAB 1: LOGIN FORM */}
+        {/* TAB 1: SIGN IN */}
         {/* ========================================================================= */}
-        {step === 'form' && activeTab === 'login' && (
+        {activeTab === 'login' && (
           <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-black text-slate-900 mb-1.5">
-                Email Address or Pseudonymous Handle
+              <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                Email Address or Username
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
@@ -230,214 +268,217 @@ export default function AuthModal({ mode = 'login', onClose, onSwitchMode }) {
                   required
                   value={loginIdentifier}
                   onChange={(e) => setLoginIdentifier(e.target.value)}
-                  placeholder="e.g. AngryAloo_42 or admin@janaudit.org"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-brand-50/50 border border-brand-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-500 font-bold shadow-xs"
+                  placeholder="name@example.com or username"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-purple-50/40 border border-purple-100 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 focus:bg-white transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-900 mb-1.5">Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-slate-800">Password</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('forgot');
+                    setError('');
+                  }}
+                  className="text-[11px] text-violet-700 font-bold hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
                 <input
-                  type="password"
+                  type={showLoginPassword ? 'text' : 'password'}
                   required
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-brand-50/50 border border-brand-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-500 font-bold shadow-xs"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-purple-50/40 border border-purple-100 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 focus:bg-white transition-all"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600"
+                >
+                  {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-2xl bg-gradient-cta text-white font-extrabold text-xs hover:shadow-purple-glow hover:scale-[1.01] active:scale-[0.99] transition-all font-['Outfit'] flex items-center justify-center space-x-2 shadow-md"
+              className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs font-['Outfit'] transition-all shadow-md flex items-center justify-center space-x-2 active:scale-[0.99]"
             >
-              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Sign In & Open Dashboard →</span>}
+              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Sign In to Dashboard →</span>}
             </button>
-
-            {/* Quick Testing Preset Pills */}
-            <div className="pt-4 border-t border-brand-100 space-y-2">
-              <p className="text-[10px] uppercase font-mono text-slate-500 font-bold">Quick Dev Presets (Click to autofill):</p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('AngryAloo_42', 'password123', 'citizen')}
-                  className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-left hover:bg-emerald-100 transition-colors"
-                >
-                  <p className="font-black text-emerald-950 text-[11px]">👤 Citizen (Sakriya)</p>
-                  <p className="text-[9px] text-emerald-700 font-mono">AngryAloo_42</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('SuperAdmin_Nagrik', 'password123', 'superadmin')}
-                  className="p-2 rounded-xl bg-purple-50 border border-purple-200 text-left hover:bg-purple-100 transition-colors"
-                >
-                  <p className="font-black text-purple-950 text-[11px]">👑 Super Admin</p>
-                  <p className="text-[9px] text-purple-700 font-mono">SuperAdmin_Nagrik</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('MP_VikasKumar', 'password123', 'representative')}
-                  className="p-2 rounded-xl bg-amber-50 border border-amber-200 text-left hover:bg-amber-100 transition-colors"
-                >
-                  <p className="font-black text-amber-950 text-[11px]">🏛️ Representative</p>
-                  <p className="text-[9px] text-amber-700 font-mono">MP_VikasKumar</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('Lokpal_Jury_Head', 'password123', 'moderator')}
-                  className="p-2 rounded-xl bg-blue-50 border border-blue-200 text-left hover:bg-blue-100 transition-colors"
-                >
-                  <p className="font-black text-blue-950 text-[11px]">⚖️ Lokpal Jury</p>
-                  <p className="text-[9px] text-blue-700 font-mono">Lokpal_Jury_Head</p>
-                </button>
-              </div>
-            </div>
           </form>
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 2: SIGNUP FORM (2-Tier Pipeline) */}
+        {/* TAB 2: CREATE ACCOUNT (WITH REAL-TIME USERNAME AVAILABILITY & SUGGESTIONS) */}
         {/* ========================================================================= */}
-        {step === 'form' && activeTab === 'signup' && (
+        {activeTab === 'signup' && (
           <form onSubmit={handleSignupSubmit} className="space-y-3.5">
-            {/* Full Name & Handle */}
+            {/* Full Name & Real-time Username */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-black text-slate-900 mb-1">Full Name</label>
+                <label className="block text-xs font-bold text-slate-800 mb-1">Full Name (Optional)</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Rahul Sharma"
-                  className="w-full px-3.5 py-2 rounded-xl bg-brand-50/50 border border-brand-200 text-xs text-slate-900 font-bold focus:outline-none focus:border-brand-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-purple-50/40 border border-purple-100 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 focus:bg-white"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-black text-slate-900">Handle (Anon)</label>
-                  <button
-                    type="button"
-                    onClick={generateRandomHandle}
-                    className="text-[10px] text-brand-700 font-bold hover:underline flex items-center space-x-0.5"
-                  >
-                    <RefreshCw className="w-2.5 h-2.5" />
-                    <span>Auto</span>
-                  </button>
+                  <label className="text-xs font-bold text-slate-800">Username / Handle</label>
+                  {checkingUsername ? (
+                    <span className="text-[10px] text-violet-600 font-mono flex items-center space-x-1">
+                      <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                      <span>Checking...</span>
+                    </span>
+                  ) : usernameStatus ? (
+                    usernameStatus.available ? (
+                      <span className="text-[10px] text-emerald-700 font-bold">✓ Available</span>
+                    ) : (
+                      <span className="text-[10px] text-rose-600 font-bold">✕ Taken</span>
+                    )
+                  ) : null}
                 </div>
                 <input
                   type="text"
                   required
                   value={handle}
                   onChange={(e) => setHandle(e.target.value)}
-                  placeholder="e.g. VikasSeeker_99"
-                  className="w-full px-3.5 py-2 rounded-xl bg-brand-50/50 border border-brand-200 text-xs text-slate-900 font-mono font-bold focus:outline-none focus:border-brand-500"
+                  placeholder="e.g. rahul_nagrik"
+                  className={`w-full px-3.5 py-2 rounded-xl text-xs font-mono font-bold focus:outline-none transition-all ${
+                    usernameStatus
+                      ? usernameStatus.available
+                        ? 'bg-emerald-50/40 border border-emerald-300 text-slate-900 focus:border-emerald-500'
+                        : 'bg-rose-50/40 border border-rose-300 text-slate-900 focus:border-rose-500'
+                      : 'bg-purple-50/40 border border-purple-100 text-slate-900 focus:border-violet-500 focus:bg-white'
+                  }`}
                 />
               </div>
             </div>
 
+            {/* Smart Username Suggestions if handle taken */}
+            {usernameStatus && !usernameStatus.available && usernameStatus.suggestions?.length > 0 && (
+              <div className="p-2.5 rounded-xl bg-rose-50/80 border border-rose-200 text-xs space-y-1.5 animate-in fade-in duration-200">
+                <p className="text-[11px] font-bold text-rose-900">
+                  That username is taken. Try one of these available suggestions:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {usernameStatus.suggestions.map((sug) => (
+                    <button
+                      key={sug}
+                      type="button"
+                      onClick={() => setHandle(sug)}
+                      className="px-2.5 py-1 rounded-lg bg-white border border-rose-200 text-violet-800 text-[11px] font-mono font-bold hover:bg-violet-50 hover:border-violet-300 transition-all shadow-2xs"
+                    >
+                      @{sug}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Email & Password */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-black text-slate-900 mb-1">Email (For OTP)</label>
+                <label className="block text-xs font-bold text-slate-800 mb-1">Email Address</label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-3.5 py-2 rounded-xl bg-brand-50/50 border border-brand-200 text-xs text-slate-900 font-bold focus:outline-none focus:border-brand-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-purple-50/40 border border-purple-100 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 focus:bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-900 mb-1">Password</label>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2 rounded-xl bg-brand-50/50 border border-brand-200 text-xs text-slate-900 font-bold focus:outline-none focus:border-brand-500"
-                />
+                <label className="block text-xs font-bold text-slate-800 mb-1">Password</label>
+                <div className="relative">
+                  <input
+                    type={showSignupPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Min 6 characters"
+                    className="w-full pl-3.5 pr-8 py-2 rounded-xl bg-purple-50/40 border border-purple-100 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 focus:bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSignupPassword(!showSignupPassword)}
+                    className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+                  >
+                    {showSignupPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Role Selection with Clear Visual Explanation */}
+            {/* Role Selector */}
             <div>
-              <label className="block text-xs font-black text-slate-900 mb-1.5">
-                Select Your Civic Role
-              </label>
+              <label className="block text-xs font-bold text-slate-800 mb-1.5">Select Account Role</label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setRole('citizen')}
-                  className={`p-3 rounded-2xl border text-center transition-all ${
+                  className={`p-2.5 rounded-xl border text-center transition-all ${
                     role === 'citizen'
-                      ? 'bg-emerald-50 border-emerald-400 text-emerald-950 font-black shadow-xs ring-2 ring-emerald-300'
-                      : 'bg-white border-brand-200 text-slate-700 hover:bg-brand-50'
+                      ? 'bg-violet-50 border-violet-400 text-violet-950 font-black ring-2 ring-violet-200'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <span className="text-lg block mb-0.5">👤</span>
+                  <span className="text-base block mb-0.5">👤</span>
                   <span className="text-xs font-bold block">Citizen</span>
-                  <span className="text-[9px] text-emerald-800 font-medium block">Instant OTP</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setRole('representative')}
-                  className={`p-3 rounded-2xl border text-center transition-all ${
+                  className={`p-2.5 rounded-xl border text-center transition-all ${
                     role === 'representative'
-                      ? 'bg-purple-50 border-purple-400 text-purple-950 font-black shadow-xs ring-2 ring-purple-300'
-                      : 'bg-white border-brand-200 text-slate-700 hover:bg-brand-50'
+                      ? 'bg-violet-50 border-violet-400 text-violet-950 font-black ring-2 ring-violet-200'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <span className="text-lg block mb-0.5">🏛️</span>
+                  <span className="text-base block mb-0.5">🏛️</span>
                   <span className="text-xs font-bold block">Representative</span>
-                  <span className="text-[9px] text-purple-800 font-medium block">Admin Review</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setRole('moderator')}
-                  className={`p-3 rounded-2xl border text-center transition-all ${
+                  className={`p-2.5 rounded-xl border text-center transition-all ${
                     role === 'moderator'
-                      ? 'bg-blue-50 border-blue-400 text-blue-950 font-black shadow-xs ring-2 ring-blue-300'
-                      : 'bg-white border-brand-200 text-slate-700 hover:bg-brand-50'
+                      ? 'bg-violet-50 border-violet-400 text-violet-950 font-black ring-2 ring-violet-200'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <span className="text-lg block mb-0.5">⚖️</span>
+                  <span className="text-base block mb-0.5">⚖️</span>
                   <span className="text-xs font-bold block">Lokpal Jury</span>
-                  <span className="text-[9px] text-blue-800 font-medium block">Admin Review</span>
                 </button>
               </div>
-
-              {role !== 'citizen' && (
-                <div className="mt-2.5 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
-                  <p className="font-bold flex items-center space-x-1">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Privileged Role Verification Notice</span>
-                  </p>
-                  <p className="text-[11px] leading-snug">
-                    After email OTP verification, your application is submitted to Lokpal Super Admin for credential authentication. You will have restricted access until verified.
-                  </p>
-                </div>
-              )}
             </div>
 
-            {/* Constituency & State */}
+            {/* State & Constituency */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-black text-slate-900 mb-1">State</label>
+                <label className="block text-xs font-bold text-slate-800 mb-1">State</label>
                 <select
                   value={state}
                   onChange={(e) => setState(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-brand-50/50 border border-brand-200 text-xs text-slate-900 font-bold focus:outline-none focus:border-brand-500"
+                  className="w-full px-3 py-2 rounded-xl bg-purple-50/40 border border-purple-100 text-xs font-bold text-slate-900 focus:outline-none focus:border-violet-500"
                 >
                   {INDIAN_STATES.map((s) => (
                     <option key={s} value={s}>{s}</option>
@@ -446,95 +487,131 @@ export default function AuthModal({ mode = 'login', onClose, onSwitchMode }) {
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-900 mb-1">Constituency</label>
+                <label className="block text-xs font-bold text-slate-800 mb-1">Constituency</label>
                 <input
                   type="text"
                   value={constituency}
                   onChange={(e) => setConstituency(e.target.value)}
                   placeholder="e.g. New Delhi"
-                  className="w-full px-3 py-2 rounded-xl bg-brand-50/50 border border-brand-200 text-xs text-slate-900 font-bold focus:outline-none focus:border-brand-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-purple-50/40 border border-purple-100 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 focus:bg-white"
                 />
               </div>
             </div>
 
-            {/* Representative / Moderator credentials URL */}
-            {role !== 'citizen' && (
-              <div>
-                <label className="block text-xs font-black text-slate-900 mb-1">
-                  Official ID / Affidavit / Press Card Verification URL (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={credentialsDoc}
-                  onChange={(e) => setCredentialsDoc(e.target.value)}
-                  placeholder="https://eci.gov.in/affidavits/id.pdf"
-                  className="w-full px-3.5 py-2 rounded-xl bg-brand-50/50 border border-brand-200 text-xs text-slate-900 font-bold focus:outline-none focus:border-brand-500 font-mono"
-                />
-              </div>
-            )}
-
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-2xl bg-gradient-cta text-white font-extrabold text-xs hover:shadow-purple-glow hover:scale-[1.01] active:scale-[0.99] transition-all font-['Outfit'] flex items-center justify-center space-x-2 shadow-md mt-2"
+              disabled={loading || (usernameStatus && !usernameStatus.available)}
+              className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs font-['Outfit'] transition-all shadow-md flex items-center justify-center space-x-2 mt-2 disabled:opacity-50"
             >
-              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Send 6-Digit Email OTP →</span>}
+              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Create Account & Send Link →</span>}
             </button>
           </form>
         )}
 
         {/* ========================================================================= */}
-        {/* STEP 2: 6-DIGIT EMAIL OTP VERIFICATION SCREEN */}
+        {/* TAB 3: FORGOT PASSWORD */}
         {/* ========================================================================= */}
-        {step === 'otp' && (
-          <form onSubmit={handleOtpSubmit} className="space-y-4">
-            <div className="p-4 rounded-2xl bg-brand-50 border border-brand-200 text-center space-y-2">
-              <span className="text-xs text-slate-600 font-bold">Simulated Email OTP Code:</span>
-              <div className="flex items-center justify-center space-x-2">
-                <span className="px-4 py-1.5 rounded-xl bg-white border border-brand-300 font-mono text-xl font-black text-brand-700 tracking-widest shadow-xs">
-                  {simulatedOtp || '123456'}
-                </span>
+        {activeTab === 'forgot' && (
+          <div className="space-y-4">
+            {forgotSent ? (
+              <div className="p-5 rounded-2xl bg-purple-50/80 border border-purple-100 text-center space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-violet-100 text-violet-700 flex items-center justify-center">
+                  <Mail className="w-6 h-6 stroke-[2.2]" />
+                </div>
+                <h4 className="text-base font-bold text-slate-900 font-['Outfit']">
+                  Password Reset Link Sent
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  If an account exists for <strong>{forgotEmail}</strong>, we have sent a secure password reset link valid for 1 hour.
+                </p>
                 <button
-                  type="button"
-                  onClick={() => setOtp(simulatedOtp || '123456')}
-                  className="px-3 py-1.5 rounded-xl bg-brand-600 text-white text-xs font-bold hover:bg-brand-700 transition-colors"
+                  onClick={() => {
+                    setActiveTab('login');
+                    setForgotSent(false);
+                  }}
+                  className="px-5 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800"
                 >
-                  Autofill Code
+                  Return to Sign In
                 </button>
               </div>
+            ) : (
+              <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                    Account Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                    <input
+                      type="email"
+                      required
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-purple-50/40 border border-purple-100 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs font-['Outfit'] transition-all shadow-md flex items-center justify-center space-x-2"
+                >
+                  {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Send Reset Instructions →</span>}
+                </button>
+
+                <div className="text-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('login')}
+                    className="text-xs text-violet-700 font-bold hover:underline"
+                  >
+                    ← Back to Sign In
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 4: VERIFICATION LINK SENT CONFIRMATION */}
+        {/* ========================================================================= */}
+        {activeTab === 'verification_sent' && (
+          <div className="space-y-4 text-center py-2">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-purple-50 border border-purple-200 text-violet-700 flex items-center justify-center shadow-xs">
+              <Mail className="w-7 h-7 stroke-[2.2]" />
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-900 mb-1.5 text-center">
-                Enter 6-Digit OTP Code
-              </label>
-              <input
-                type="text"
-                required
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="123456"
-                className="w-full text-center px-4 py-3 rounded-2xl bg-brand-50/50 border border-brand-300 text-2xl font-mono font-black tracking-widest text-slate-900 focus:outline-none focus:border-brand-500 shadow-xs"
-              />
+              <h4 className="text-lg font-black text-slate-900 font-['Outfit']">
+                Check Your Inbox
+              </h4>
+              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed max-w-sm mx-auto">
+                We sent an activation link to <strong>{registeredEmail}</strong>. Click the link in your email to activate your account.
+              </p>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 rounded-2xl bg-gradient-cta text-white font-extrabold text-sm hover:shadow-purple-glow hover:scale-[1.01] active:scale-[0.99] transition-all font-['Outfit'] flex items-center justify-center space-x-2 shadow-md"
-            >
-              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Verify & Launch Role Dashboard →</span>}
-            </button>
+            <div className="pt-2 space-y-2">
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resending}
+                className="w-full py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-violet-800 text-xs font-bold transition-colors flex items-center justify-center space-x-2"
+              >
+                {resending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Resend Verification Link</span>}
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setStep('form')}
-              className="w-full text-center text-xs text-brand-700 font-bold hover:underline"
-            >
-              ← Back to Registration Form
-            </button>
-          </form>
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-xs text-slate-500 hover:text-slate-800 font-medium"
+              >
+                Close & Return to Platform
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

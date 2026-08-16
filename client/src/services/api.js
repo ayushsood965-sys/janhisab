@@ -16,10 +16,14 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auth & 2-Tier Verification
+// Auth & Verification API
+export const checkUsernameAvailability = (handle) => api.get('/auth/check-username', { params: { handle } });
 export const signupUser = (data) => api.post('/auth/signup', data);
 export const registerUser = (data) => api.post('/auth/signup', data);
-export const verifyEmailOtp = (data) => api.post('/auth/verify-email', data);
+export const verifyEmailToken = (token) => api.post('/auth/verify-email', { token });
+export const resendVerificationEmail = (email) => api.post('/auth/resend-verification', { email });
+export const forgotPassword = (email) => api.post('/auth/forgot-password', { email });
+export const resetPassword = (token, newPassword) => api.post('/auth/reset-password', { token, newPassword });
 export const loginUser = (data) => api.post('/auth/login', data);
 export const getCurrentUser = () => api.get('/auth/me');
 export const getMe = () => api.get('/auth/me');

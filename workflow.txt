@@ -1,0 +1,919 @@
+====================================================================================================
+🏛️ JANAUDIT (जन ऑडिट) — COMPLETE PLATFORM WORKFLOW & ARCHITECTURE MANUAL
+   India's Citizen-Led Public Accountability & Civic-Tech Platform
+====================================================================================================
+
+DOCUMENT VERSION: 2.0 (Comprehensive Edition)
+TARGET AUDIENCE: Citizens, Voters, Representatives, Moderators, Administrators, Developers
+FILE LOCATION: Root/workflow.txt
+
+----------------------------------------------------------------------------------------------------
+TABLE OF CONTENTS
+----------------------------------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY & PURPOSE (WHAT IS JANAUDIT & WHY DOES IT EXIST?)
+2. HIGH-LEVEL PLATFORM ARCHITECTURE & TECH STACK
+3. USER ROLES & ACCESS HIERARCHY (WHO CAN DO WHAT?)
+4. AUTHENTICATION & IDENTITY LIFECYCLE (SIGNUP, VERIFICATION, PASSWORDS, PRIVACY)
+5. THE CIVIC KARMA & GAMIFICATION SYSTEM (JANTA POINTS, TIERS, BADGES, VOTING POWER)
+6. THE DYNAMIC IMPACT SCORE™ & DIVERGENCE ENGINE (HOW POLITICIANS ARE RATED)
+7. MODULE-BY-MODULE DETAILED GUIDE (EVERY FEATURE EXPLAINED IN PLAIN LANGUAGE)
+   - 7.1 Voice Wall & Geo-Tagged Grievance Feed
+   - 7.2 Politician Directory & Report Cards
+   - 7.3 Manifesto & Election Promise Tracker ("Wada Tracker")
+   - 7.4 Instant RTI Factory (Right to Information 2005)
+   - 7.5 Petitions & Digital Mass Mobilization
+   - 7.6 Interactive Constituency GIS Heatmap & Pincode Engine
+   - 7.7 Public Institutions Directory & Scorecards
+   - 7.8 Satirical Meme Studio & Roast/Toast Cards
+   - 7.9 Protest Jukebox & Whistleblower Audio Tapes
+   - 7.10 Collectible Neta Cards & Top Trumps Civic Deck
+   - 7.11 Civic Bounty Board & Weekly Ghotala Awards
+   - 7.12 Andolan Live (48-Hour Ephemeral Protest Rooms)
+   - 7.13 Grievance Redressal Portal (IT Rules 2021 Statutory Compliance)
+   - 7.14 AI Civic Intelligence Suite ("Sach Bol" & NLP Spam Shield)
+8. ROLE-SPECIFIC CONSOLES & DASHBOARDS (EVERY TAB & BUTTON EXPLAINED)
+   - 8.1 Citizen Console (/dashboard/citizen)
+   - 8.2 Representative Console (/dashboard/representative)
+   - 8.3 Moderator Console (/dashboard/moderator)
+   - 8.4 Super Admin & CMS Console (/dashboard/admin & /cms-admin)
+9. SECURITY, PRIVACY & ANTI-MANIPULATION DEFENSES
+10. END-TO-END STEP-BY-STEP USER JOURNEYS (HOW PEOPLE USE THE PLATFORM IN REAL LIFE)
+11. COMPLETE API DIRECTORY & DATA MODELS CHEATSHEET
+12. FREQUENTLY ASKED QUESTIONS (FAQ) FOR LAYMEN
+
+====================================================================================================
+1. EXECUTIVE SUMMARY & PURPOSE (WHAT IS JANAUDIT & WHY DOES IT EXIST?)
+====================================================================================================
+
+WHAT IS JANAUDIT?
+JanAudit ("Jan" = People in Hindi, "Audit" = Verification / Accountability) is a full-stack, real-time
+civic-technology platform designed specifically for Indian democracy. It bridges the deep communication
+and accountability chasm between 1.4 billion Indian citizens and their elected representatives
+(Members of Parliament - MPs, Members of Legislative Assembly - MLAs, and Municipal Corporators), as well
+as local administrative bodies (PWD, Municipal Corporations, Health Departments, Police Stations, and
+Discoms).
+
+WHY WAS IT BUILT? (THE PROBLEM IN INDIAN GOVERNANCE):
+1. The 5-Year Amnesia: Politicians make grand election manifestos during rallies, but after election
+   day, citizens have no central place to track which promises were actually delivered vs which were
+   abandoned ("Jumlas").
+2. The Broken Grievance Loop: When a road has dangerous potholes, streetlights don't work, or a civil
+   hospital lacks basic medicines, citizen complaints on social media get lost, ignored, or drowned out
+   by IT-cell political noise.
+3. Information Asymmetry: The average voter does not know their MP/MLA's attendance in Parliament, their
+   criminal court cases, how they spent their ₹5 Crore/year MPLAD/MLALAD development funds, or how their
+   declared assets grew by 500% in five years.
+4. RTI Bureaucracy: The Right to Information (RTI) Act 2005 is one of India's greatest democratic tools,
+   but ordinary citizens find the legal drafting intimidating and do not know where to send applications.
+5. IT-Cell Manipulation & Brigading: Online rating systems often get hijacked by paid political bots
+   who spam 5-star or 1-star reviews without ever setting foot in the constituency.
+
+HOW JANAUDIT SOLVES THIS:
+JanAudit acts as an open, democratic "Glasshouse of Governance." It combines crowd-sourced evidence,
+un-tamperable mathematical rating algorithms (Quadratic Voting), verified official government gazettes,
+instant legal RTI drafting, and gamified citizen audits to make public service transparent, measurable,
+and responsive.
+
+====================================================================================================
+2. HIGH-LEVEL PLATFORM ARCHITECTURE & TECH STACK
+====================================================================================================
+
+The JanAudit system is built using modern, fast, and secure web technologies:
+
+1. FRONTEND (The Visual Interface in your Web Browser):
+   - Framework: React 18 with Vite (ultra-fast rendering, instant page transitions).
+   - Styling: Tailwind CSS & custom design tokens (modern typography, high-contrast dark/light accents,
+     glassmorphism cards, interactive badges).
+   - Routing: React Router v7 (smooth navigation between public feeds, maps, and private dashboards).
+   - Real-Time WebSockets: Socket.IO Client (live comment feeds, real-time vote reaction counters,
+     Andolan live chats, and instant score updates).
+   - Interactive GIS Maps: Leaflet & React-Leaflet (interactive OpenStreetMap visualizer for constituency
+     boundaries, pothole pin-drops, and infrastructure issues).
+   - Charts & Analytics: Chart.js & React-Chartjs-2 (radar charts for multi-dimensional leader ratings,
+     trend lines, attendance vs national average bar graphs).
+   - Animations: Framer Motion, Canvas Confetti, and Lottie animations.
+
+2. BACKEND (The Core Server & Logic Brain):
+   - Server Engine: Node.js with Express.js REST API.
+   - Database: MongoDB with Mongoose Object Data Modeling (ODM). Includes an automatic In-Memory
+     MongoDB fallback for zero-configuration local development.
+   - Real-Time Engine: Socket.IO WebSocket Server managing live rooms, live ticker broadcasts, and
+     ephemeral protest rooms.
+   - Authentication & Encryption: JSON Web Tokens (JWT) stored in HTTP headers, Bcrypt password hashing
+     (10 salt rounds), and Node Crypto 256-bit random tokens for email/password resets.
+   - Image & File Sanitization: Multer file uploads paired with `Sharp` image processing. Sharp
+     automatically strips all GPS EXIF metadata, camera serial numbers, and device fingerprints to protect
+     whistleblowers' real-world safety.
+   - Security Armor: Helmet HTTP security headers, Express Rate Limit (DDoS and spam protection), CORS
+     whitelist enforcement, and strict Role-Based Access Control (RBAC) middlewares.
+
+====================================================================================================
+3. USER ROLES & ACCESS HIERARCHY (WHO CAN DO WHAT?)
+====================================================================================================
+
+JanAudit features 4 distinct user roles, each equipped with custom privileges and dedicated consoles:
+
+----------------------------------------------------------------------------------------------------
+ROLE 1: 👤 CITIZEN (AAM NAGRIK / WHISTLEBLOWER)
+----------------------------------------------------------------------------------------------------
+- Who they are: General voters, local residents, student activists, RTI filers, and whistleblowers.
+- Verification Status: Automatically `VERIFIED` as soon as they confirm their email address.
+- What they can do:
+  * Browse all public leader scorecards, promise trackers, maps, and meme studios.
+  * Post geo-tagged grievances, photos, and scam expose reports on the Voice Wall.
+  * Corroborate fellow citizens' reports with the "Seal of Janta" (crowdsourced verification).
+  * Rate elected politicians across 7 governance dimensions using Quadratic Voting.
+  * Launch and sign citizen petitions with automatic escalation milestones.
+  * Generate legally compliant Form 'A' RTI applications and upload received government replies.
+  * Pool Janta Points to launch investigative bounties and claim bounty rewards.
+  * Join 48-Hour ephemeral Andolan Live protest rooms.
+  * Earn Karma Points, level up their Karma Tier, and collect digital Neta Cards.
+  * Optionally verify their authenticity with a ₹11 UPI micro-verification to earn a "Verified Nagrik" badge.
+
+----------------------------------------------------------------------------------------------------
+ROLE 2: 🏛️ ELECTED REPRESENTATIVE (MP / MLA / CORPORATOR / OFFICIAL)
+----------------------------------------------------------------------------------------------------
+- Who they are: Sitting Members of Parliament, MLAs, municipal corporators, or their official offices.
+- Verification Status: Requires email verification + uploading proof of office (ECI election certificate /
+  official legislative identity). Placed in `PENDING_ADMIN_VERIFICATION` until approved by Super Admin.
+- What they can do:
+  * Access the Representative Console (/dashboard/representative).
+  * Exercise the official "Right of Reply" on any grievance post tagged to their name/constituency.
+  * Submit photo evidence of completed public works and update grievance statuses (Reported -> In Progress -> Resolved).
+  * Add and update election manifesto promises, setting completion progress from 0% to 100%.
+  * Publish official community bulletins and emergency municipal announcements.
+  * Inspect constituency sentiment analytics (satisfaction scores, top complaint categories).
+
+----------------------------------------------------------------------------------------------------
+ROLE 3: 🛡️ COMMUNITY MODERATOR (LOKPAL JUROR / FACT CHECKER)
+----------------------------------------------------------------------------------------------------
+- Who they are: Trusted senior citizens, verified journalists, legal advocates, and high-Karma volunteers.
+- Verification Status: Requires proof of civic experience; approved by Super Admin.
+- What they can do:
+  * Access the Moderator Console (/dashboard/moderator).
+  * Review the "Lokpal Evidence Queue" to evaluate disputed civic claims.
+  * Vote on community evidence (Verified, Insufficient, Misleading) and upgrade evidence tiers.
+  * Author official "Fact-Check Registry" rulings citing government gazettes and RTI documents.
+  * Inspect flagged content, bot-farm spam clusters, and quarantined posts.
+  * Review immutable moderation audit logs.
+
+----------------------------------------------------------------------------------------------------
+ROLE 4: 👑 SUPER ADMIN (LOKPAL CHIEF / PLATFORM ADMINISTRATOR)
+----------------------------------------------------------------------------------------------------
+- Who they are: Platform stewards responsible for system integrity, anti-manipulation, and system configuration.
+- What they can do:
+  * Access the Super Admin Console (/dashboard/admin & /cms-admin).
+  * Review the Role Verification Queue to Approve or Reject Representative and Moderator applications.
+  * Search, inspect, change roles, and Lock/Unlock any user account.
+  * Dynamically tune the 4-Pillar Impact Score algorithm weights in real time (e.g. adjust attendance weight).
+  * Master CRUD control over the Politician directory (add new candidates, update assets, freeze brigaded profiles).
+  * Enable or disable any of the 13 platform modules in 1 click (Modular CMS).
+  * Broadcast site-wide emergency ticker announcements across the top banner.
+  * Inspect security audit logs and bot quarantine events.
+
+====================================================================================================
+4. AUTHENTICATION & IDENTITY LIFECYCLE (SIGNUP, VERIFICATION, PASSWORDS, PRIVACY)
+====================================================================================================
+
+1. REGISTRATION (/api/auth/signup & AuthModal):
+   - A user signs up with their Full Name, chosen or generated Username/Handle, Email, Password, Role,
+     State, and Constituency.
+   - Pseudonymous Username Generator: If a citizen wishes to remain completely anonymous, the system can
+     generate a randomized civic pseudonym (e.g., `PotholeHunter_4892`, `RtiWarrior_1034`, `AngryAloo_8812`).
+   - Real-Time Username Availability Checker (/api/auth/check-username): As the user types their desired
+     username, the system checks in real time if it is taken. If taken, it automatically suggests 4 smart
+     alternatives (e.g. `handle_audit`, `handle_nagrik`, `real_handle`, `handle542`).
+   - Zero Plaintext Phone Retention: Phone numbers are hashed using irreversible SHA-256 for Sybil-prevention
+     without storing the citizen's personal phone number on the server.
+
+2. CRYPTOGRAPHIC 24-HOUR EMAIL VERIFICATION (/verify-email?token=...):
+   - Upon signup, an account is created with `verificationStatus: 'PENDING_EMAIL_VERIFICATION'`.
+   - The backend generates a secure 32-byte hexadecimal random token with a 24-hour expiration timestamp.
+   - An HTML email is dispatched with a one-click verification link. (In local development mode without SMTP,
+     the link is cleanly printed into the terminal console).
+   - Once the user clicks the link, their email is marked verified:
+     * Citizens transition immediately to `VERIFIED` status.
+     * Representatives/Moderators transition to `PENDING_ADMIN_VERIFICATION` awaiting credential audit.
+
+3. FORGOT & RESET PASSWORD WORKFLOW (/reset-password?token=...):
+   - If a user forgets their password, they submit their email at `/api/auth/forgot-password`.
+   - A secure 1-hour reset token is generated and emailed.
+   - The user opens `/reset-password?token=...`, enters their new password (minimum 6 characters), and the
+     backend encrypts the new password using bcrypt before invalidating the used token.
+
+4. LOGIN & SESSION MANAGEMENT (/api/auth/login & /api/auth/me):
+   - Users can log in using either their Email or their Username Handle + Password.
+   - If their account is locked by Super Admin, login is rejected with an explanatory notice.
+   - Upon successful login, the system issues a signed JWT Token (30-day validity) and awards the user
+     their Daily Active Streak bonus (+15 Janta Points).
+
+5. ₹11 UPI "VERIFIED NAGRIK" TRUST BADGE (/api/auth/verify-nagrik-upi):
+   - To combat fake bot accounts without requiring invasive government Aadhaar ID storage, JanAudit
+     introduces a voluntary ₹11 UPI micro-verification trust mechanism.
+   - Completing this simulation unlocks the "Verified Nagrik" shield badge on the user's profile, awards
+     +150 Karma Points, +300 Janta Points, and boosts their civic credibility tier.
+
+====================================================================================================
+5. THE CIVIC KARMA & GAMIFICATION SYSTEM (JANTA POINTS, TIERS, BADGES, VOTING POWER)
+====================================================================================================
+
+To make civic participation exciting, rewarding, and manipulation-proof, JanAudit features a two-currency
+gamification engine:
+
+----------------------------------------------------------------------------------------------------
+CURRENCY 1: KARMA POINTS (REPUTATION & VOTING MULTIPLIER)
+----------------------------------------------------------------------------------------------------
+Karma represents your permanent civic reputation. It cannot be bought; it is only earned through verified
+truthful actions in service of democracy.
+
+THE 4 KARMA TIERS:
++-------------------+----------------+--------------+-----------------------------------------------+
+| Tier Name         | Karma Required | Voting Power | Unlocked Platform Privileges                  |
++-------------------+----------------+--------------+-----------------------------------------------+
+| 🥉 Nagrik         | 0 - 99 pts     | 0.5x         | Standard post creation, petition signing      |
+| 🥈 Sakriya Nagrik | 100 - 499 pts  | 1.0x         | Standard voting weight, community comments    |
+| 🥇 Prabhari       | 500 - 1999 pts | 2.0x         | 2x Rating power, launch bounties              |
+| 👑 Guardian/Lokpal| 2000+ pts      | 3.0x         | 3x Rating power, Community Jury voting rights |
++-------------------+----------------+--------------+-----------------------------------------------+
+
+----------------------------------------------------------------------------------------------------
+CURRENCY 2: JANTA POINTS (SPENDABLE CIVIC XP)
+----------------------------------------------------------------------------------------------------
+Janta Points are spendable credits used to interact with platform mechanisms:
+
+HOW TO EARN JANTA POINTS:
+- Creating a verified civic grievance report: +25 XP
+- Leaving a constructive comment on a post: +5 XP
+- Corroborating a fellow citizen's report: +10 XP
+- Filing a petition: +30 XP
+- Signing a petition: +10 XP
+- Uploading a verified government RTI reply: +100 XP
+- Daily login streak: +15 XP per continuous day
+- ₹11 UPI micro-verification: +300 XP
+- Submitting winning evidence for an investigative bounty: Pool reward (e.g. +500 XP)
+
+HOW TO SPEND JANTA POINTS:
+- Quadratic Voting on Leader Ratings: (Votes)^2 credits (1 vote = 1 pt, 2 votes = 4 pts, 3 votes = 9 pts, 4 votes = 16 pts, 5 votes = 25 pts).
+- Boosting a critical civic post to the top of trending feeds: 50 to 500 pts.
+- Funding an investigative Bounty pool: 100 to 1000 pts.
+
+CIVIC BADGES UNLOCKED THROUGH PARTICIPATION:
+- 🗳️ "Democracy Pioneer" — Awarded upon joining the platform.
+- 📜 "RTI Warrior" — Awarded upon uploading a verified RTI disclosure document.
+- 🛡️ "Verified Nagrik" — Awarded upon completing ₹11 trust micro-verification.
+- 🔍 "Local Investigator" — Awarded upon submitting winning bounty evidence.
+- ⚖️ "Lokpal Juror" — Awarded upon reaching Guardian tier and voting in the evidence queue.
+
+====================================================================================================
+6. THE DYNAMIC IMPACT SCORE™ & DIVERGENCE ENGINE (HOW POLITICIANS ARE RATED)
+====================================================================================================
+
+Unlike subjective opinion polls or partisan television debates, JanAudit rates every elected representative
+(MP/MLA) on an objective, auditable, mathematical scale from 0.0 to 100.0 known as the Impact Score™.
+
+----------------------------------------------------------------------------------------------------
+THE 4-PILLAR MATHEMATICAL FORMULA:
+----------------------------------------------------------------------------------------------------
+Impact Score = (Pillar 1 * 45%) + (Pillar 2 * 25%) + (Pillar 3 * 20%) + (Pillar 4 * 10%)
+
+PILLAR 1: OBJECTIVE PARLIAMENTARY & ECI DATA (45% WEIGHT)
+Data sourced directly from official records (Digital Sansad, PRS Legislative Research, MyNeta/ADR affidavits):
+1. Legislative Attendance (15%): Actual days attended in Parliament/Assembly vs national average (79%).
+2. Questions Asked & Debates (15%): Number of public interest queries raised on the assembly floor.
+3. Criminal Record Penalty (20% Negative Penalty):
+   - 0 pending cases = 100 / 100 score.
+   - Each pending criminal charge docks 20 points.
+   - Each conviction docks 45 points.
+4. Asset Growth vs Market Benchmark (15%):
+   - Compares the politician's 5-year declared asset growth with the Sensex/economic benchmark (approx 74%).
+   - Asset growth > 200% yields 70/100; > 500% yields 45/100; > 1000% yields 20/100 (Unexplained Wealth Penalty).
+5. Private Member Bills Introduced (10%): Proactivity in formulating new laws.
+6. Fund Utilization (15%): Percentage of ₹5 Cr/year MPLADS or MLALADS development budget spent on local works.
+7. RTI Compliance Rate (10%): History of government departments under their charge answering citizen RTIs on time.
+
+PILLAR 2: VERIFIED LOCAL OUTCOMES & GROUND TRUTH (25% WEIGHT)
+- Number of delivered election manifesto promises (from the Promise Tracker).
+- Volume of community-corroborated, geotagged evidence files uploaded by verified local citizens.
+
+PILLAR 3: COMMUNITY SENTIMENT & QUADRATIC CITIZEN RATINGS (20% WEIGHT)
+- Citizens rate the representative across 7 dimensions (Infrastructure, Accessibility, Promise Keeping,
+  Transparency, Legislative, Social, Economic) on a 0-100 slider.
+- Anti-Manipulation Protections applied:
+  a) Quadratic Cost: To cast N votes, a user must spend N^2 Janta Points (1 vote=1pt, 2 votes=4pts, 3 votes=9pts).
+     This stops rich users or bot accounts from skewing the results.
+  b) Evidence Multiplier: Ratings submitted with attached proof receive a 3x weight boost (Tier 1 proof) or 1.5x boost (Tier 2).
+  c) Geographic Local Multiplier: Verified voters residing inside the politician's actual constituency receive 3.0x rating weight.
+  d) Wilson Lower Bound Confidence: Statistical adjustment that prevents a politician with only 1 positive vote from getting 100%.
+
+PILLAR 4: TRUST RECENCY DECAY (10% WEIGHT)
+- Rewards consistent year-round public engagement while penalizing "Missing in Action" politicians who only show
+  up 2 months before elections.
+
+----------------------------------------------------------------------------------------------------
+THE 6 BADGE TIERS:
+----------------------------------------------------------------------------------------------------
+Based on the final computed Impact Score (0 to 100), every politician is assigned a public badge:
+
+Score 90.0 - 100.0: 🌟 "Janta ka Sher" ("The Chaiwala Who Delivered") — Exemplary public service
+Score 70.0 - 89.9:  ✅ "Kaam Karne Wala" ("Actually Does Stuff") — Solid positive governance
+Score 50.0 - 69.9:  😐 "Theek Hai" ("Suspiciously Silent") — Average, uninspiring performance
+Score 30.0 - 49.9:  😴 "Sust Neta" ("Missing Action Hero") — High absenteeism, stalled projects
+Score 10.0 - 29.9:  🤥 "Jumla Champion" ("Ghotala Specialist") — Unfulfilled promises, criminal charges
+Score 0.0 - 9.9:    🤡 "Total Nautanki" ("Janta ka Dushman") — Extreme negligence, critical public failure
+
+----------------------------------------------------------------------------------------------------
+THE DIVERGENCE ENGINE (ROTTEN TOMATOES DUAL-SCORE SYSTEM):
+----------------------------------------------------------------------------------------------------
+Just like movie reviews show a Critic Score vs Audience Score, JanAudit calculates:
+- Kaam Score (Objective Data Score from official government records)
+- Janta Voice (Ground Citizen Sentiment Score)
+
+If the difference between Kaam Score and Janta Voice exceeds 30 points, the system flags a Divergence:
+1. ⚠️ SUSPICIOUS HIGH SENTIMENT: If public ratings are 90% but objective data shows 0 attendance and 0 funds spent,
+   JanAudit flags "Possible coordinated rating bot activity under review."
+2. ℹ️ UNPOPULAR HIGH DELIVERY: If a politician has 95% attendance and finished all roads, but has low sentiment due
+   to partisan noise, JanAudit highlights "Strong legislative delivery amidst intense public scrutiny."
+
+====================================================================================================
+7. MODULE-BY-MODULE DETAILED GUIDE (EVERY FEATURE EXPLAINED IN PLAIN LANGUAGE)
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+7.1 VOICE WALL & GEO-TAGGED GRIEVANCE FEED (URL: `/`)
+----------------------------------------------------------------------------------------------------
+What it is: The front page of JanAudit — a live, real-time social timeline of civic issues, whistleblower
+reports, investigations, and community polls.
+
+Key Capabilities:
+- Post Types: Citizens can publish Text grievances, Memes, Evidence documents, Videos, Audio recordings,
+  or Community Polls.
+- Evidence Level Badges:
+  * 🟢 Verified: Supported by official RTI copies, court orders, or corroborated geotagged photos.
+  * 🟡 Likely: Backed by credible news reports or multi-witness accounts.
+  * ⚪ Opinion: Citizen commentary, personal observations, or satire.
+  * 🔴 Disputed: Challenged claims currently under review in the Lokpal Evidence Queue.
+- Content Friction & Anti-Defamation Shield:
+  If a user tags a politician with a serious corruption allegation ("clown_behavior", "peak_corruption")
+  without attaching any evidence links or documents, a gentle popup warning triggers:
+  "Adding a source strengthens your post! Want to attach an RTI or photo? If you proceed without evidence,
+  your post will route to the Unverified public bucket until corroborated."
+- "Seal of Janta" Corroboration:
+  Any citizen living in the area can click the "Corroborate" button on a post. When 3 or more independent
+  citizens corroborate an issue, the post automatically upgrades from Opinion to Verified and earns the
+  golden "Seal of Janta" shield.
+- Custom Political Reactions:
+  Instead of generic social media likes, citizens react with:
+  🔥 (Viral Expose / Fire) | 💀 (Dead Governance) | 😂 (Meme / Comedy) | 🤡 (Jumla Alert) | ✊ (Solidarity) | 🧾 (Needs Proof)
+- Automated EXIF Stripping:
+  All uploaded grievance photos are automatically re-processed through the server's `Sharp` engine,
+  erasing the photographer's exact phone GPS coordinates and device model to guarantee complete physical safety.
+- Janta Points Boost:
+  Users can spend their Janta Points (e.g. 50 XP) to boost important local reports to the top of the feed.
+
+----------------------------------------------------------------------------------------------------
+7.2 POLITICIAN DIRECTORY & REPORT CARDS (URL: `/politicians` & `/politicians/:id`)
+----------------------------------------------------------------------------------------------------
+What it is: The central biographical and performance database of India's elected MPs and MLAs.
+
+Key Capabilities:
+- Filter & Search: Search by politician name, party, state, constituency, house (Lok Sabha, Rajya Sabha,
+  Vidhan Sabha), or filter by Impact Score ranges.
+- Top Ticker: Live "Wall of Fame" (Top 5 highest rated leaders) vs "Wall of Shame" (Bottom 5 lowest rated leaders).
+- Detailed Leader Profile:
+  * Profile banner with party symbol, constituency, education, age, and declared criminal charges.
+  * Interactive 4-Pillar Score Breakdown pie and bar visualizers.
+  * Radar Chart displaying the 7-dimension score (Infrastructure, Accessibility, Transparency, etc.).
+  * "Follow the Money" Asset Tracker: Visual comparison of declared assets in 2019 vs 2024 against
+    the benchmark Sensex economic growth rate (+74%).
+  * Right of Reply Feed: Verified official statements posted by the politician or their media office.
+  * Profile Anthem: A satirical or celebratory song chosen by the community from the Protest Jukebox.
+  * Rating Submission Form: Sliders for citizens to submit multi-dimensional quadratic ratings with attached proof.
+  * Anti-Brigading Freeze Shield: If a politician's profile experiences an unnatural surge of ratings in a short window,
+    the system automatically freezes new scores to protect against bot-farm attacks.
+
+----------------------------------------------------------------------------------------------------
+7.3 MANIFESTO & ELECTION PROMISE TRACKER (URL: `/promises`)
+----------------------------------------------------------------------------------------------------
+What it is: A digital "GitHub for Governance" that tracks political election promises milestone by milestone.
+
+Key Capabilities:
+- Promise Lifecycles:
+  * 🔴 Not Started (0% progress)
+  * 🟡 In Progress (1% to 99% progress with milestone timeline updates)
+  * 🟢 Delivered / Completed (100% finished with official gazette/inauguration evidence)
+  * ❌ Broken / Failed (Target deadline missed or officially cancelled)
+- "Jumla Index": Highlights promises where the target date has passed with 0% delivery.
+- Draggable "Promise vs Reality" Image Slider: An interactive before-and-after slider allowing citizens to
+  drag across an image (e.g., Left: 3D architect rendering of promised highway; Right: Actual waterlogged dirt road).
+- Governance Milestone Timeline: A commit-log showing dates of tender release, budget sanction, contractor
+  assignment, and citizen site inspections.
+- Citizen Evidence Submission: Any voter can click "Submit Evidence" on a promise to attach ground photos or RTI replies.
+
+----------------------------------------------------------------------------------------------------
+7.4 INSTANT RTI FACTORY (URL: `/rti-factory`)
+----------------------------------------------------------------------------------------------------
+What it is: An automated legal drafting wizard that democratizes the Right to Information Act 2005 for ordinary citizens.
+
+Key Capabilities:
+- Pre-Configured Departmental Templates:
+  * Road & Infrastructure (PWD / NHAI)
+  * Hospital & Medicine Availability (Health Department)
+  * School Infrastructure & Teacher Vacancies (Education Department)
+  * Municipal Sanitation & Drainage Budgets (Municipal Corporation)
+  * Police Complaint FIR Action Status (Police Department)
+  * MPLAD / MLALAD Development Fund Disbursal (District Collectorate)
+  * Ration & PDS Food Supply (Food & Civil Supplies)
+  * Environment & Industrial Pollution (Pollution Control Board)
+- 1-Click Form 'A' Generator:
+  Citizens select a template, type their district/constituency, and the system instantly formats a legally
+  valid RTI Application under Section 6(1) of the RTI Act 2005 complete with statutory questions, PIO designation,
+  and ₹10 postal order payment instructions.
+- Public RTI Vault (/api/rtis/vault):
+  When a citizen receives their official written reply from the government, they can upload the PDF to JanAudit's
+  public vault. Other citizens can freely search and cite these documents.
+- "RTI League" Leaderboard:
+  Ranks and celebrates the top citizen RTI warriors across India.
+
+----------------------------------------------------------------------------------------------------
+7.5 PETITIONS & DIGITAL MASS MOBILIZATION (URL: `/petitions`)
+----------------------------------------------------------------------------------------------------
+What it is: A citizen-driven petition platform that turns online signatures into direct government accountability.
+
+Key Capabilities:
+- Launch a Petition: Citizens specify the civic demand, target government department (e.g. Water Board),
+  target official designation (e.g. Chief Engineer), and signature goal (e.g. 1,000 signatures).
+- 1-Verified Signature Per Citizen: Enforces uniqueness to prevent signature spoofing.
+- Automatic Escalation Milestones:
+  * 100 Signatures: Petition gains "Community Momentum" badge and trending homepage spotlight.
+  * 1,000 Signatures: Status automatically changes to `notice_dispatched` and sends a formal public notice
+    to the tagged representative's console.
+- Official Right of Reply: The target government official or politician can post an official response
+  directly inside the petition.
+
+----------------------------------------------------------------------------------------------------
+7.6 INTERACTIVE CONSTITUENCY GIS HEATMAP & PINCODE ENGINE (URL: `/constituency-map`)
+----------------------------------------------------------------------------------------------------
+What it is: A Leaflet-powered geospatial map that visualizes infrastructure issues and constituency boundaries across India.
+
+Key Capabilities:
+- Geotagged Issue Pin-Drops: Color-coded map markers showing cracked flyovers, broken water mains, toxic
+  dumping sites, and school repair issues with clickable photo popups.
+- Pin-Drop New Issue: Users can click anywhere on the map to drop a coordinate pin with description and photo.
+- 6-Digit Indian PIN Code Lookup Engine:
+  Enter any PIN code (e.g. 110001 for Delhi, 400001 for Mumbai, 560001 for Bengaluru) to instantly reveal:
+  * Lok Sabha Constituency & Member of Parliament (MP)
+  * Vidhan Sabha Constituency & MLA
+  * Total population and literacy rate
+  * Development budget allocated vs spent
+  * List of local schools and civil hospitals
+- "Hawa Meter" Trending Political Issues:
+  A real-time sentiment gauge that monitors exploding civic hashtags (e.g. `#WaterCrisis`, `#BrokenRoadsNashik`)
+  and categorizes them by state and momentum ("exploding", "growing", "fading").
+
+----------------------------------------------------------------------------------------------------
+7.7 PUBLIC INSTITUTIONS DIRECTORY & SCORECARDS (URL: `/institutions`)
+----------------------------------------------------------------------------------------------------
+What it is: An accountability directory for local public facilities — Civil Hospitals, Police Stations,
+Government Schools, Municipal Offices, PWD Divisions, Electricity Boards, and Water Boards.
+
+Key Capabilities:
+- 5-Dimensional Citizen Scorecards:
+  1. Service Quality
+  2. Responsiveness
+  3. Cleanliness & Hygiene
+  4. Corruption-Free Score (Honesty)
+  5. Infrastructure Quality
+- Budget Transparency: Shows total public budget allocated (in ₹ Crores) vs actual utilized funds.
+- Issue Tracker: Shows total complaints filed against the facility vs total resolved.
+
+----------------------------------------------------------------------------------------------------
+7.8 SATIRICAL MEME STUDIO & ROAST/TOAST CARDS (URL: `/meme-studio`)
+----------------------------------------------------------------------------------------------------
+What it is: A civic meme creator that harnesses political satire and humor to engage younger voters in democracy.
+
+Key Capabilities:
+- Pre-Loaded Satirical Templates:
+  * "Promise vs Reality Two-Panel" (Manifesto dream vs Ground reality)
+  * "The Great Press Conference Silence" (When asked about fund utilization)
+  * "Asset Growth Anomaly Graph" (Sensex return +74% vs Neta Ji net worth +1978%)
+  * "Missing In Action MLA" (Parliament attendance 14% vs Instagram reels 450)
+- Roast & Toast Viral Cards: A public gallery of the community's funniest and most incisive civic memes.
+
+----------------------------------------------------------------------------------------------------
+7.9 PROTEST JUKEBOX & WHISTLEBLOWER AUDIO TAPES (URL: `/protest-jukebox`)
+----------------------------------------------------------------------------------------------------
+What it is: A cultural audio hub for democracy anthems, protest rap, folk songs, and protected whistleblower tapes.
+
+Key Capabilities:
+- Music Player: Play tracks across genres (Protest Rap, Desh Bhakti Satire, Folk Awaaz, Jumla Anthem).
+- Whistleblower Tape Vault (Voice-Masked Audio):
+  Citizens holding sensitive audio recordings of corruption or illegal demands can upload them to the vault.
+  The platform simulates acoustic voice-masking and distortion filters so the whistleblower's natural voice
+  cannot be identified by voice-recognition software.
+- Assign Anthem to Politician: Upvoted tracks can be linked to a politician's profile page as their theme song.
+
+----------------------------------------------------------------------------------------------------
+7.10 COLLECTIBLE NETA CARDS & TOP TRUMPS CIVIC DECK (URL: `/neta-cards`)
+----------------------------------------------------------------------------------------------------
+What it is: Gamified digital collectible trading cards featuring stats of Indian politicians (inspired by cricket/Top Trumps cards).
+
+Key Capabilities:
+- Card Rarity Tiers:
+  * ⚪ Common (Silver Border)
+  * 🟡 Rare (Gold Border)
+  * 🟣 Legendary (Holographic Crimson / Neon Glow Border)
+- Snapshot Stats: Shows the politician's Impact Score, Sansad Attendance Rate, Promises Kept Ratio ("4/15 Kept"),
+  Criminal Cases, and 5-Year Asset Growth %.
+- Civic Card Collection Deck: Users unlock and collect cards in their personal deck by visiting profiles, rating leaders,
+  and auditing constituency issues.
+
+----------------------------------------------------------------------------------------------------
+7.11 CIVIC BOUNTY BOARD & WEEKLY GHOTALA AWARDS (URL: `/bounties`)
+----------------------------------------------------------------------------------------------------
+What it is: Crowdsourced investigation bounties and community-voted civic awards.
+
+Key Capabilities:
+- Launching an Investigation Bounty:
+  A citizen pools Janta Points (e.g. 500 XP) asking for ground evidence (e.g. "Need photo proof of whether Ward 14
+  drain desilting was completed"). Other citizens can contribute additional points to the pool.
+- Bounty Evidence Submission: Any on-ground citizen visits the location, captures photos, and submits proof.
+  Once verified by the Lokpal Community Jury, the pooled points are paid out to the investigator.
+- "Weekly Ghotala Awards":
+  Every week, the community votes on humorous democratic awards:
+  * 🤡 "Peak Nautanki of the Week" (e.g., Inaugurating a boat ride on a flooded street while claiming 0 potholes).
+  * 🤥 "Biggest Jumla of the Week" (e.g., Promised 100-bed hospital plot currently used for buffalo grazing).
+  * 😴 "Sleeping Beauty of the Week" (e.g., 0 questions asked in 3 years with 98% dinner attendance).
+  * 👑 "Actually Based of the Week" (e.g., Completed rural pipeline 4 months early with 100% verified audit).
+
+----------------------------------------------------------------------------------------------------
+7.12 ANDOLAN LIVE (48-HOUR EPHEMERAL PROTEST ROOMS) (URL: `/andolan`)
+----------------------------------------------------------------------------------------------------
+What it is: Safe, temporary, synchronized digital satyagraha spaces for non-violent civic movements.
+
+Key Capabilities:
+- Ephemeral Self-Destruct Timer (48 Hours):
+  Every Andolan room is created with a strict 48-hour Time-to-Live (TTL) countdown. Upon expiration, all messages,
+  chat history, and active records self-destruct from the database to prevent retrospective surveillance.
+- Real-Time Live Chat: Synchronized WebSocket communication for coordinating local non-violent assemblies.
+- Live Participant Headcount: Displays active attendees and peak mobilization numbers.
+- Emergency SOS Safety Alerts: Participants can flag high-priority emergency alerts (e.g., roadblock updates,
+  medical aid stations, legal volunteer contacts) which pin in bold red text to the top of the room.
+
+----------------------------------------------------------------------------------------------------
+7.13 GRIEVANCE REDRESSAL PORTAL (IT RULES 2021 STATUTORY COMPLIANCE) (URL: `/grievance`)
+----------------------------------------------------------------------------------------------------
+What it is: An official legal grievance filing desk fully compliant with the Information Technology
+(Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021 of India.
+
+Key Capabilities:
+- Complaint Categories:
+  * Defamation without supporting evidence
+  * Hate speech or communal incitement
+  * Doxxing of private personal information
+  * Fake / Misleading misinformation
+  * Harassment
+- Statutory SLA Timelines:
+  * Mandatory 24-Hour Acknowledgment SLA: System issues an official tracking ticket ID (`GRV-2026-XXXXXX`).
+  * Mandatory 15-Day Resolution SLA: Grievance Officer reviews supporting proof and takes appropriate action
+    (Friction badge applied, content quarantined, or dismissed under public interest defense).
+
+----------------------------------------------------------------------------------------------------
+7.14 AI CIVIC INTELLIGENCE SUITE ("SACH BOL" & NLP SPAM SHIELD)
+----------------------------------------------------------------------------------------------------
+What it is: A suite of artificial intelligence micro-services designed to summarize complex government data
+and protect platform integrity.
+
+Key Capabilities:
+- 5-Line AI Issue Summarizer (/api/ai/summarize-issue):
+  Distills 200+ comments and long grievance threads into 5 concise, actionable bullet points:
+  Line 1: Core Issue Summary
+  Line 2: Ground Context
+  Line 3: Top Citizen Demand
+  Line 4: Community Pulse & Sentiment
+  Line 5: Departmental Accountability Status
+- "Sach Bol" Fact-Check Engine (/api/ai/sach-bol-check):
+  Analyzes political claims against CAG audit digests, MoRTH open data, and JanAudit corroborated photo pools
+  to return an automated Truth Score (0-100%) with primary source citations.
+- NLP Spam Clustering Detector (/api/ai/spam-check):
+  Scans recent comment bursts for identical repetitive phrases (e.g., paid IT-cell copypasta) and triggers
+  an automatic quarantine recommendation if repetition exceeds 40%.
+
+====================================================================================================
+8. ROLE-SPECIFIC CONSOLES & DASHBOARDS (EVERY TAB & BUTTON EXPLAINED)
+====================================================================================================
+
+When a logged-in user visits `/dashboard`, the smart dispatcher automatically opens their dedicated role console:
+
+----------------------------------------------------------------------------------------------------
+8.1 CITIZEN CONSOLE (/dashboard/citizen)
+----------------------------------------------------------------------------------------------------
+Designed for voters and whistleblowers to manage their civic contributions:
+
+1. Tab 1: "My Civic Reports"
+   - Shows all grievance reports posted by the user.
+   - Live indicators for Corroborations count, Evidence Level, and Reaction totals.
+   - Buttons: "Edit Report" (modify text/category), "Delete Report", and "Create New Civic Report".
+2. Tab 2: "My Petitions"
+   - Shows all petitions launched by the user with signature progress bars (e.g. 420 / 1000 signatures).
+   - Shows status (Open, Milestone Reached, Notice Dispatched).
+   - Buttons: "Launch New Petition", "Edit Petition Details", and "Withdraw Petition".
+3. Tab 3: "My RTI Requests"
+   - Repository of all Form 'A' drafts generated by the user.
+   - Button: "Draft New Form 'A' RTI" (opens the multi-field generator).
+   - Button: "Upload Received RTI Reply" (allows publishing official government answers to the public vault).
+4. Tab 4: "Karma & Rewards"
+   - Visual breakdown of current Karma Tier, Voting Power Multiplier (0.5x to 3.0x), and spendable Janta Points.
+   - Unlocked digital badges showcase.
+   - "₹11 Verified Nagrik Shield Activation" simulation button.
+5. Tab 5: "Account Settings"
+   - Edit user bio, change default constituency/state, and toggle daily email notification preferences.
+
+----------------------------------------------------------------------------------------------------
+8.2 REPRESENTATIVE CONSOLE (/dashboard/representative)
+----------------------------------------------------------------------------------------------------
+Designed for elected MPs, MLAs, Corporators, and their administrative teams:
+
+1. Tab 1: "Constituency Issues"
+   - Displays all citizen grievances and Voice Wall posts tagged in the representative's jurisdiction.
+   - Button: "Submit Right of Reply & Status Update" -> Opens a dedicated form where the leader can write
+     an official response, update the status to "In Progress" or "Resolved", and attach photo proof of completed work.
+2. Tab 2: "Manifesto Promises"
+   - Lists all manifesto pledges for their term.
+   - Button: "Add New Promise" -> Specify title, category, description, and target completion date.
+   - Button: "Update Progress %" -> Draggable slider from 0% to 100% to reflect work completed.
+3. Tab 3: "Official Bulletins"
+   - Publish official municipal notices, press releases, or emergency ward announcements directly to citizens.
+4. Tab 4: "Civic Analytics"
+   - Charts visualizing voter sentiment trends, top complaint categories (Roads vs Water vs Electricity),
+     and monthly resolution speed.
+5. Tab 5: "Verification ID"
+   - Upload official legislative identity documents or ECI election certificates for Lokpal Super Admin verification.
+
+----------------------------------------------------------------------------------------------------
+8.3 MODERATOR CONSOLE (/dashboard/moderator)
+----------------------------------------------------------------------------------------------------
+Designed for Lokpal Jurors and verified civic moderators:
+
+1. Tab 1: "Lokpal Evidence Queue"
+   - Queue of disputed citizen posts and claims requiring evidence verification.
+   - Buttons: Vote "Verified" (+10 pts to post credibility), "Insufficient Proof", or "Misleading".
+   - Button: "Upgrade Evidence Tier" -> Promotes post from Opinion to Verified (Seal of Janta).
+2. Tab 2: "Flagged Content & Spam"
+   - Reviews reports filed by users and automated NLP spam cluster detections.
+   - Buttons: "Quarantine Post" or "Dismiss Flag (Safe Public Interest)".
+3. Tab 3: "Fact-Check Registry"
+   - Complete database of official fact-checks.
+   - Button: "Publish New Fact Check" -> Add claim, verdict (Verified True, Partly True, Misleading, False),
+     explanation, and official gazette citations.
+4. Tab 4: "Jury Audit Logs"
+   - Chronological, read-only history of all evidence upgrades, deletions, and moderation decisions.
+
+----------------------------------------------------------------------------------------------------
+8.4 SUPER ADMIN CONSOLE (/dashboard/admin & /cms-admin)
+----------------------------------------------------------------------------------------------------
+Designed for Platform Stewards and Lokpal Administrators:
+
+1. Tab 1: "Role Verification Queue"
+   - Lists all Representative and Moderator applicants with attached credential documents.
+   - Buttons: "Approve & Verify" (instantly activates representative/moderator status and awards +500 XP bonus)
+     or "Reject Application".
+2. Tab 2: "User Management"
+   - Searchable table of all registered users with filters by role and status.
+   - Actions: Change User Role (Citizen, Representative, Moderator, Superadmin) and "Toggle Lock/Unlock Account".
+3. Tab 3: "Modular CMS Toggles" (/cms-admin)
+   - 1-Click On/Off feature switches for all 13 modules (Voice Wall, Politicians, RTIs, Petitions, Maps, Memes,
+     Jukebox, Bounties, Andolan Mode, etc.).
+   - Global Site Announcement Banner editor (change marquee message, link, and active status).
+4. Tab 4: "Algorithm Weight Tuner"
+   - Real-time dynamic sliders to adjust the mathematical weights of the 4-Pillar Impact Score formula:
+     * Objective Data Weight (Default: 45%)
+     * Verified Outcomes Weight (Default: 25%)
+     * Community Sentiment Weight (Default: 20%)
+     * Trust Recency Weight (Default: 10%)
+5. Tab 5: "Politician Master CRUD"
+   - Full control to Add new politicians, edit attendance metrics, update assets/criminal records, or delete entries.
+   - "Toggle Anti-Brigading Freeze": Quarantines politician score if under coordinated attack.
+6. Tab 6: "Platform Security Logs"
+   - Real-time audit log of system security events, rate-limit triggers, role changes, and formula tunings.
+
+====================================================================================================
+9. SECURITY, PRIVACY & ANTI-MANIPULATION DEFENSES
+====================================================================================================
+
+JanAudit implements a defense-in-depth security model to safeguard democratic discourse:
+
+1. ZERO-PII CRYPTOGRAPHIC STORAGE:
+   - Plaintext mobile phone numbers are never stored in the database. Phone numbers are converted into
+     one-way SHA-256 cryptographic hashes for Sybil-resistance.
+2. EXIF METADATA STRIPPING:
+   - Every uploaded image is scrubbed by the `Sharp` image processing engine, stripping GPS coordinates,
+     camera model, and timestamp metadata so whistleblowers cannot be tracked.
+3. QUADRATIC VOTING ARMOR:
+   - Standard voting allows wealthy entities to purchase thousands of bot votes. Quadratic voting increases
+     the cost of casting additional votes exponentially (Cost = N^2), making mass brigade manipulation
+     mathematically prohibitive.
+4. GEOGRAPHIC 3X RELEVANCE MULTIPLIER:
+   - Ratings cast by verified local voters living within the politician's actual constituency receive 3x the
+     mathematical weight compared to outside accounts.
+5. DIVERGENCE ASTROTURF DETECTION:
+   - If a politician with 0 attendance and high criminal records suddenly receives a flood of 5-star reviews,
+     the Divergence Engine triggers a public alert warning citizens of astroturfing.
+6. RATE LIMITING & SECURITY HEADERS:
+   - `express-rate-limit` prevents brute-force login attempts and spam grievance flooding.
+   - `helmet` enforces strict HTTP Content-Security-Policy and cross-site scripting (XSS) protections.
+7. IT RULES 2021 COMPLIANCE:
+   - Fully designated Grievance Redressal Officer workflow with statutory 24-hour acknowledgment and 15-day
+     resolution tracking.
+
+====================================================================================================
+10. END-TO-END STEP-BY-STEP USER JOURNEYS (HOW PEOPLE USE THE PLATFORM IN REAL LIFE)
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+JOURNEY A: CITIZEN REPORTS A DANGEROUS POTHOLE ON A FLYOVER
+----------------------------------------------------------------------------------------------------
+1. Step 1 (Discovery): Priya, a college student in New Delhi, spots a deep, dangerous pothole cluster on
+   the Ring Road flyover that caused multiple scooter accidents.
+2. Step 2 (Capture & Post): Priya opens JanAudit on her smartphone, clicks "+ Post Grievance", takes a photo,
+   selects category "Infrastructure", tags "New Delhi", and writes a description.
+3. Step 3 (Sanitization & Publishing): The server strips her phone's GPS EXIF metadata. Priya earns +25 Janta Points.
+4. Step 4 (Community Corroboration): Two other local daily commuters see the post on the Voice Wall and click
+   "Corroborate". When the 3rd corroboration is logged, the post receives the golden "Seal of Janta" verified badge.
+5. Step 5 (Representative Response): The local MLA's office sees the high-priority report on their Representative
+   Console. Within 48 hours, PWD patches the flyover. The MLA uploads a photo of the smooth road via the "Right of Reply"
+   tab and marks the issue status as "Resolved". Priya and her neighbors receive a live resolution notification.
+
+----------------------------------------------------------------------------------------------------
+JOURNEY B: CITIZEN INVESTIGATES AN UNFULFILLED HOSPITAL PROMISE
+----------------------------------------------------------------------------------------------------
+1. Step 1 (Manifesto Audit): Rahul visits `/promises` and notices his MP promised a 100-bed Civil Hospital in 2019,
+   but the progress bar has been stuck at 10% for four years.
+2. Step 2 (Instant RTI Generation): Rahul navigates to `/rti-factory`, selects the "Hospital & Medicines" template,
+   enters his district, and clicks "Generate Form 'A'". The platform produces a ready-to-print RTI application
+   asking for tender copies, funds disbursed, and reasons for construction delay.
+3. Step 3 (Public Vault Upload): 25 days later, the District Medical Officer sends an official reply admitting the
+   contractor abandoned the project after receiving 40% advance funds. Rahul uploads the PDF to JanAudit's RTI Vault.
+4. Step 4 (Impact & Reward): Rahul earns +100 XP and unlocks the "RTI Warrior" badge. The MP's Objective Kaam Score
+   automatically drops, and the promise is flagged with a red "Jumla Alert".
+5. Step 5 (Mass Mobilization): Rahul launches a petition titled "Blacklist Delinquent Contractor & Resume Hospital Work"
+   on `/petitions`. When 1,000 citizens sign, an automated formal escalation notice is dispatched to the State Health Ministry.
+
+----------------------------------------------------------------------------------------------------
+JOURNEY C: AN ELECTED REPRESENTATIVE BUILDS PROVABLE TRUST
+----------------------------------------------------------------------------------------------------
+1. Step 1 (Onboarding): Rajesh, a newly elected MLA, registers on JanAudit and uploads his Election Commission
+   certificate for verification.
+2. Step 2 (Admin Approval): The Lokpal Super Admin reviews the document and approves Rajesh's official representative profile.
+3. Step 3 (Proactive Engagement): Rajesh uses his Representative Console to post weekly updates on drainage desilting
+   and water pipeline installations, providing official tender links.
+4. Step 4 (Score Growth): As verified project outcomes are logged and local citizens rate his accessibility, Rajesh's
+   Impact Score climbs to 88.5, earning him the prestigious "Kaam Karne Wala" badge and a spot on the live "Wall of Fame" ticker.
+
+====================================================================================================
+11. COMPLETE API DIRECTORY & DATA MODELS CHEATSHEET
+====================================================================================================
+
+REST API ENDPOINTS SUMMARY:
+- AUTHENTICATION:
+  * `POST /api/auth/signup` — Register citizen/representative account & send verification email.
+  * `POST /api/auth/login` — Login with Email/Handle + Password (returns JWT token).
+  * `GET  /api/auth/me` — Fetch current user profile, karma tier, badges, and points.
+  * `GET  /api/auth/check-username` — Real-time handle availability checker with smart suggestions.
+  * `POST /api/auth/verify-email` — Verify account using cryptographic token.
+  * `POST /api/auth/resend-verification` — Resend fresh 24h verification link.
+  * `POST /api/auth/forgot-password` — Send 1h password reset email.
+  * `POST /api/auth/reset-password` — Update password using reset token.
+  * `POST /api/auth/verify-nagrik-upi` — Activate ₹11 verified trust badge (+150 Karma, +300 Janta Pts).
+
+- VOICE WALL & POSTS:
+  * `GET  /api/posts` — Get filtered feed (category, constituency, evidenceLevel, trending/verified sorting).
+  * `POST /api/posts` — Create new post with content friction checks.
+  * `POST /api/posts/:id/react` — Cast political reaction (fire, skull, clown, solidarity, needsEvidence).
+  * `POST /api/posts/:id/comment` — Add commentary or witness testimony.
+  * `POST /api/posts/:id/corroborate` — "Seal of Janta" community corroboration.
+  * `POST /api/posts/:id/boost` — Spend Janta Points to boost visibility.
+  * `POST /api/posts/:id/vote-poll` — Vote in community poll.
+  * `POST /api/posts/upload-media` — Upload photo/video with automatic EXIF sanitization.
+  * `PUT  /api/posts/:id` — Update report details (author or admin).
+  * `DELETE /api/posts/:id` — Delete report.
+  * `POST /api/posts/:id/representative-reply` — Representative official Right of Reply & status update.
+
+- POLITICIANS & IMPACT SCORES:
+  * `GET  /api/politicians` — Query leader directory with performance filters.
+  * `GET  /api/politicians/ticker` — Top 5 Wall of Fame vs Bottom 5 Wall of Shame.
+  * `GET  /api/politicians/:id` — Single profile with 4-pillar breakdown, divergence, and promises.
+  * `POST /api/politicians/:id/reply` — Submit official statement under Right of Reply.
+  * `POST /api/politicians/:id/anthem` — Set or upvote Protest Jukebox profile anthem.
+  * `POST /api/politicians` — Create new politician profile (Super Admin).
+  * `PUT  /api/politicians/:id` — Update politician metrics, assets, or freeze status (Super Admin).
+  * `DELETE /api/politicians/:id` — Delete politician profile (Super Admin).
+
+- RATINGS (QUADRATIC VOTING):
+  * `POST /api/ratings` — Cast multi-dimensional quadratic rating (costs votes^2 credits, applies local 3x multiplier).
+
+- PROMISES & MANIFESTO TRACKER:
+  * `GET  /api/promises` — List promises by status, category, or politician.
+  * `GET  /api/promises/sliders` — List interactive Promise vs Reality image comparison sliders.
+  * `GET  /api/promises/:id` — Get promise timeline milestones.
+  * `POST /api/promises/:id/evidence` — Submit citizen ground evidence for a promise.
+  * `POST /api/promises` — Add new election promise (Representative / Admin).
+  * `PUT  /api/promises/:id` — Update promise progress % and delivery status.
+  * `DELETE /api/promises/:id` — Delete promise record.
+
+- RTI FACTORY:
+  * `GET  /api/rtis/templates` — List departmental RTI templates.
+  * `POST /api/rtis/generate` — Generate structured Form 'A' RTI application draft.
+  * `POST /api/rtis/generate-draft` — Custom RTI draft creator.
+  * `GET  /api/rtis/vault` — Search public archive of disclosed government RTI replies.
+  * `POST /api/rtis/upload-response` — Upload received RTI reply to public vault (+100 XP).
+  * `GET  /api/rtis/leaderboard` — Top citizen RTI filers league.
+
+- PETITIONS:
+  * `GET  /api/petitions` — List civic petitions and signature progress.
+  * `GET  /api/petitions/:id` — Single petition details and right of reply.
+  * `POST /api/petitions` — Launch new petition.
+  * `POST /api/petitions/:id/sign` — Sign petition (enforces 1 verified signature per user).
+  * `PUT  /api/petitions/:id` — Update petition.
+  * `DELETE /api/petitions/:id` — Withdraw petition.
+
+- CONSTITUENCY MAPS & GIS:
+  * `GET  /api/constituencies/pincode/:pincode` — Resolve 6-digit Indian PIN code to MP, MLA, and budget stats.
+  * `GET  /api/constituencies/map-issues` — Get geotagged issue pins for Leaflet map.
+  * `POST /api/constituencies/map-issues` — Pin-drop new civic issue on map.
+  * `GET  /api/constituencies/hawa-meter` — Trending political topics and state hashtags.
+
+- GAMIFICATION, BOUNTIES & AWARDS:
+  * `GET  /api/gamification/bounties` — List open investigation bounties.
+  * `POST /api/gamification/bounties` — Launch new bounty (pool Janta Points).
+  * `POST /api/gamification/bounties/:id/contribute` — Add points to bounty pool.
+  * `POST /api/gamification/bounties/:id/submit-proof` — Submit evidence to claim bounty reward.
+  * `GET  /api/gamification/ghotala-awards` — Weekly Ghotala Awards nominations and vote tallies.
+  * `POST /api/gamification/ghotala-awards/vote` — Vote for weekly award nominee.
+
+- ANDOLAN LIVE (EPHEMERAL PROTEST ROOMS):
+  * `GET  /api/andolan/rooms` — List active 48-hour live rooms.
+  * `POST /api/andolan/rooms` — Launch new 48-hour room with automatic TTL self-destruct.
+  * `GET  /api/andolan/rooms/:code` — Get room chat feed and safety alerts.
+
+- MODERATION & IT RULES 2021:
+  * `POST /api/moderation/grievance` — File legal grievance under IT Rules 2021 (issues 24h ticket ID).
+  * `GET  /api/moderation/grievances` — List grievances and SLA statuses.
+  * `GET  /api/moderation/community-jury/queue` — Lokpal Evidence review queue.
+  * `POST /api/moderation/community-jury/vote` — Juror vote on disputed evidence.
+  * `GET  /api/moderation/fact-checks` — Public fact-check registry.
+  * `POST /api/moderation/fact-checks` — Author new fact-check entry.
+  * `POST /api/moderation/upgrade-evidence` — Upgrade post evidence tier.
+
+- SUPER ADMIN & CMS:
+  * `GET  /api/admin/pending-verifications` — Representative/moderator applications awaiting approval.
+  * `POST /api/admin/verify-user` — Approve or reject user role application.
+  * `GET  /api/admin/users` — List and filter all users.
+  * `POST /api/admin/users/:id/role` — Update user role directly.
+  * `POST /api/admin/users/:id/toggle-lock` — Lock or unlock user account.
+  * `GET  /api/admin/audit-logs` — Platform security and administrative logs.
+  * `GET  /api/cms/config` — Get CMS weights, modules, and announcement banner config.
+  * `PUT  /api/cms/weights` — Dynamically re-tune 4-Pillar Impact Score formula weights.
+  * `PUT  /api/cms/modules` — Toggle any of the 13 platform modules on/off.
+  * `PUT  /api/cms/announcement` — Update global announcement marquee banner.
+
+====================================================================================================
+12. FREQUENTLY ASKED QUESTIONS (FAQ) FOR LAYMEN
+====================================================================================================
+
+Q1: Is JanAudit affiliated with any political party (BJP, Congress, AAP, etc.)?
+A1: Absolutely NOT. JanAudit is 100% non-partisan, open-source, and citizen-led. The rating algorithm
+    treats all political parties with identical mathematical rules based on verified objective data
+    and ground citizen evidence.
+
+Q2: How does JanAudit prevent political IT-cells from spamming fake reviews?
+A2: JanAudit uses a multi-layered anti-manipulation shield:
+    1. Quadratic Voting: Casting multiple votes requires exponentially increasing credits (1, 4, 9, 16, 25 points).
+    2. Geographic 3x Multiplier: Votes from people living outside the constituency have minimal impact.
+    3. Divergence Engine: Flags abnormal rating spikes that don't match actual attendance/work data.
+    4. Anti-Brigading Freeze: Temporarily quarantines profiles experiencing coordinated burst attacks.
+    5. Wilson Confidence Intervals: Adjusts scores based on sample size so 1 fake vote cannot skew a rating.
+
+Q3: Will the police or politicians know who I am if I report corruption?
+A3: No. You can register using an anonymous pseudonymous handle (e.g. `PotholeHunter_4281`). Our server
+    automatically strips all GPS EXIF metadata and device information from your uploaded photos, and never
+    stores your plaintext phone number.
+
+Q4: How do politicians benefit from joining JanAudit?
+A4: Honest, hardworking politicians who actually deliver roads, schools, and hospitals often get drowned
+    out by loud partisan media. JanAudit gives performing leaders a verified, evidence-backed platform to
+    showcase their completed work, exercise their official Right of Reply, resolve voter complaints, and
+    earn the coveted "Janta ka Sher" badge of honor.
+
+Q5: What happens to the chat messages in an Andolan Live room?
+A5: Every Andolan room has an automatic 48-Hour self-destruct timer (TTL). When the timer expires, the entire
+    room and all message logs are permanently purged from the database, leaving zero historical surveillance trail.
+
+Q6: How do I earn Janta Points to vote and boost posts?
+A6: You earn points simply by being an active, helpful citizen: reporting local issues (+25), commenting (+5),
+    corroborating neighbors' reports (+10), drafting petitions (+30), uploading RTI answers (+100), and logging
+    in daily (+15).
+
+====================================================================================================
+🏛️ JANAUDIT — PRO-DEMOCRACY. PRO-TRANSPARENCY. DIRECT DEMOCRATIC ACCOUNTABILITY.
+   "Democracy is not a spectator sport. Every promise tracked, every score explainable."
+====================================================================================================

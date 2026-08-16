@@ -1,5 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getMe, loginUser, signupUser, verifyEmailOtp, verifyNagrikUpi, verifyUserApplication } from '../services/api';
+import {
+  getMe,
+  loginUser,
+  signupUser,
+  verifyEmailToken,
+  resendVerificationEmail,
+  forgotPassword as apiForgotPassword,
+  resetPassword as apiResetPassword,
+  verifyNagrikUpi,
+  verifyUserApplication,
+} from '../services/api';
 
 const AuthContext = createContext();
 
@@ -43,18 +53,34 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
-  const verifyEmail = async (emailOrHandle, otp) => {
-    const res = await verifyEmailOtp({
-      email: emailOrHandle.includes('@') ? emailOrHandle : undefined,
-      handle: !emailOrHandle.includes('@') ? emailOrHandle : undefined,
-      otp,
-    });
+  const verifyEmailByToken = async (tokenString) => {
+    const res = await verifyEmailToken(tokenString);
     if (res.data.success) {
       localStorage.setItem('janaudit_token', res.data.token);
       setToken(res.data.token);
       setUser(res.data.user);
       return res.data;
     }
+  };
+
+  const resendVerification = async (email) => {
+    const res = await resendVerificationEmail(email);
+    return res.data;
+  };
+
+  const forgotPassword = async (email) => {
+    const res = await apiForgotPassword(email);
+    return res.data;
+  };
+
+  const resetPassword = async (tokenString, newPassword) => {
+    const res = await apiResetPassword(tokenString, newPassword);
+    if (res.data.success && res.data.token) {
+      localStorage.setItem('janaudit_token', res.data.token);
+      setToken(res.data.token);
+      setUser(res.data.user);
+    }
+    return res.data;
   };
 
   const logout = () => {
@@ -103,7 +129,11 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         register: signup,
-        verifyEmail,
+        verifyEmail: verifyEmailByToken,
+        verifyEmailByToken,
+        resendVerification,
+        forgotPassword,
+        resetPassword,
         logout,
         verifyUpi,
         adminApproveUser,

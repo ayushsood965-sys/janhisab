@@ -28,6 +28,8 @@ import AndolanLivePage from './pages/AndolanLivePage';
 import GrievancePortalPage from './pages/GrievancePortalPage';
 import CmsSuperAdminPage from './pages/CmsSuperAdminPage';
 import AboutPage from './pages/AboutPage';
+import VerifyEmailPage from './pages/auth/VerifyEmailPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 
 // Role Dashboard Pages
 import CitizenDashboard from './pages/dashboard/CitizenDashboard';
@@ -105,6 +107,8 @@ function AppContent({ showCreatePostModal, setShowCreatePostModal, announcement 
           <Route path="/grievance" element={<GrievancePortalPage />} />
           <Route path="/cms-admin" element={<CmsSuperAdminPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Role Dashboard Routes */}
           <Route path="/dashboard" element={<DashboardDispatcher />} />
